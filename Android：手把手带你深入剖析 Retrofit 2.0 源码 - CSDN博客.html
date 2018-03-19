@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)http://blog.csdn.net/carson_ho/article/details/73732115 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script type="text/javascript" async="" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/pr.js.下载"></script><script charset="utf-8" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/b.js.下载"></script><script charset="utf-8" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/b.js.下载"></script><script type="text/javascript" async="" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/gaeieted.js.下载"></script>
+    <link rel="canonical" href="http://blog.csdn.net/carson_ho/article/details/73732115"> 
+    <script src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/hm.js.下载"></script><script type="text/javascript" charset="utf-8" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/apiaccept"></script><script src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/hm.js.下载"></script><script type="text/javascript">
+        var username = "carson_ho";
+        var _blogger = username;
+        var blog_address = "//blog.csdn.net/carson_ho";
+        var static_host = "https://csdnimg.cn/release/phoenix/";
+        var currentUserName = ""; 
+        var fileName = '73732115';
+        var commentscount = 15;
+        var islock = false;
+        window.quickReplyflag = true;
+        var totalFloor = 15;
+        var isBole = false;
+        var isDigg = false;
+        var isExpert = false;
+        var isAdm = false;
+        var baiduKey = "retrofit2%E6%BA%90%E7%A0%81";
+        var needInsertBaidu = false;
+        var isShowAds = true;
+    </script>
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="referrer" content="always">
+    <script src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/jquery-1.9.1.min.js.下载" type="text/javascript"></script>
+    <link rel="stylesheet" href="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/avatar.css">
+                <link rel="stylesheet" href="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/main-e3c59b92ac.css">
+          <link rel="stylesheet" href="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/content_toolbar.css">
+
+    <script src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/main-1.0.5.js.下载"></script>
+    <script type="text/javascript" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/tracking-1.0.2.js.下载" charset="utf-8"></script>
+    <script type="text/javascript" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/main-8d014fd5be.js.下载"></script>
+
+    <script src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/ds.js.下载"></script>
+    <script type="text/javascript">
+        // Traffic Stats of the entire Web site By baidu
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?6bcd52f51e9b3dce32bec4a3997715ac";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+        // Traffic Stats of the entire Web site By baidu end
+    </script>
+    <meta name="description" content="前言
+在Andrroid开发中，网络请求十分常用
+而在Android网络请求库中，Retrofit是当下最热的一个网络请求库今天，我将手把手带你深入剖析Retrofit v2.0的源码，希望你们会喜欢  在阅读本文前，建议先阅读文章：这是一份很详细的 Retrofit 2.0 使用教程（含实例讲解）
+目录1. 简介特别注意：
+准确来说，Retrofit 是一个 RESTful 的 HTTP 网络请求">
+    <meta name="keywords" content="android,retrofit2-0">
+    <meta http-equiv="Cache-Control" content="no-siteapp"><link rel="alternate" media="handheld" href="http://blog.csdn.net/carson_ho/article/details/73732115#">
+    <meta name="shenma-site-verification" content="5a59773ab8077d4a62bf469ab966a63b_1497598848">
+    <title>Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客</title>
+    <link href="http://csdnimg.cn/public/favicon.ico" rel="SHORTCUT ICON">
+              <script src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/baidu_search-1.1.2.js.下载" type="text/javascript"></script>
+            </head>
+<body><div class="csdn-toolbar csdn-toolbar tb_disnone  csdn-toolbar-skin-black ">        <div class="container row center-block ">          <ul class="pull-left left-menu clearfix">            <li>              <a href="http://www.csdn.net/" title="CSDN首页" target="_blank"><svg class="icon" aria-hidden="true"><use xlink:href="#toolbar-csdnlogo"></use></svg></a>            </li>            <li><a href="http://blog.csdn.net/" class="toolbar_to_feed" title="博客" target="_blank">博客</a></li>            <li><a href="http://edu.csdn.net/" title="学院" target="_blank">学院</a></li>            <li><a href="http://download.csdn.net/" title="下载" target="_blank">下载</a></li>            <li><a href="http://gitbook.cn/?ref=csdn" title="GitChat" target="_blank">GitChat</a></li>            <li class="tb_is1090hide"><a href="http://bbs.csdn.net/" title="论坛" target="_blank">论坛</a></li>            <li class="tb_is1150hide"><a href="http://ask.csdn.net/" title="问答" target="_blank">问答</a></li>            <li class="tb_is1210hide"><a href="http://mall.csdn.net/" title="商城" target="_blank">商城</a></li>            <li class="tb_is1270hide"><a href="http://download.csdn.net/vip_code" title="下载VIP" target="_blank">VIP</a></li>            <li class="tb_is1330hide"><a href="http://huiyi.csdn.net/" title="活动" target="_blank">活动</a></li>            <li class="tb_is1400hide"><a href="http://job.csdn.net/" title="招聘" target="_blank">招聘</a></li>            <li class="tb_is1452hide"><a href="http://www.iteye.com/" title="ITeye" target="_blank">ITeye</a></li>            <li class="tb_is1513hide"><a href="http://www.gitee.com/" title="码云" target="_blank">码云</a></li>            <li class="tb_is1513hide"><a href="http://www.csto.com/" title="CSTO" target="_blank">CSTO</a></li>            <li class="show-more">            <a href="javascript:;" class="show-more-a"><svg width="22" height="4" xmlns="http://www.w3.org/2000/svg"><path d="M2 4a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm9 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm9 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" fill="#4F4F4F" fill-rule="evenodd"></path></svg></a>              <div class="more">                <div class="tb_is1090show"><a href="http://bbs.csdn.net/" target="_blank">论坛</a></div>                <div class="tb_is1150show"><a href="http://ask.csdn.net/" target="_blank">问答</a></div>                <div class="tb_is1210show"><a href="http://mall.csdn.net/" target="_blank">商城</a></div>                <div class="tb_is1270show"><a href="http://download.csdn.net/vip_code" target="_blank">下载VIP</a></div>                <div class="tb_is1330show"><a href="http://huiyi.csdn.net/" target="_blank">活动</a></div>                <div class="tb_is1400show"><a href="http://job.csdn.net/" target="_blank">招聘</a></div>                <div class="tb_is1452show"><a href="http://www.iteye.com/" target="_blank">ITeye</a></div>                <div class="tb_is1513show"><a href="http://www.gitee.com/" target="_blank">码云</a></div>                <div class="tb_is1513show"><a href="http://www.csto.com/" target="_blank">CSTO</a></div>              </div>            </li>          </ul>          <div class="pull-right login-wrap unlogin">            <ul class="btns">            <li class="toolbar-tracking csdn-tracking-statistics tracking-click" data-mod="popu_369"><a href="http://blog.csdn.net/carson_ho/article/details/73732115#" style="padding:0" target="_blank"></a></li>              <li>                <div class="search_bar csdn-tracking-statistics tracking-click" data-mod="popu_366">                  <input type="text" class="input_search" name="">                  <a href="http://so.csdn.net/so/" target="_blank" class="btn-nobg-noborder btn-search"><i class="iconfont-toolbar toolbar-sousuo"></i></a>                </div>              </li>              <li class="write-bolg-btn csdn-tracking-statistics tracking-click" data-mod="popu_370"><a class="" href="http://mp.csdn.net/postedit" target="_blank"><i class="iconfont-toolbar toolbar-icon_boke"></i><span>写博客</span></a></li>              <li class="gitChat"><a class="" href="http://gitbook.cn/new/gitchat/activity?utm_source=csdnblog1" target="_blank"><i class="iconfont-toolbar toolbar-icon_gitchatx"></i><span>发Chat</span></a></li>              <li class="userinfo"><a href="https://passport.csdn.net/account/login">登录</a><span></span><a href="https://passport.csdn.net/account/mobileregister?action=mobileRegister">注册</a></li>              <li class="userLogin">                <div class="loginCenter"><a href="http://my.csdn.net/" target="_blank"><img class="login_img" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/100x100.jpg"><div class="toolbar-circle"></div></a></div>                <div class="userControl">                  <div><a href="http://blog.csdn.net/" target="_blank">我的博客</a></div>                  <div><a class="xiaoxi" href="http://msg.csdn.net/" target="_blank">消息<span class="toolbar-newsL">(3)</span></a></div>                  <div><a href="http://my.csdn.net/my/account/changepwd" target="_blank">设置</a></div>                  <div><a href="http://bbs.csdn.net/forums/Service" target="_blank">反馈</a></div>                  <div><a href="http://oldblog.csdn.net/home/help.html" target="_blank">帮助</a></div>                  <div><a href="http://passport.csdn.net/account/logout">退出</a></div>                </div>              </li>            </ul>          </div>        </div>    </div><script class="toolbar-s" type="text/javascript" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/iconfont.js.下载"></script>
+<script id="toolbar-tpl-scriptId" prod="download" skin="black" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/content_toolbar.js.下载" type="text/javascript" domain="//blog.csdn.net/"></script>
+<div class="container clearfix">
+  <main>
+    <div style="display:none;">
+      <img src="http://blog.csdn.net/carson_ho/article/details/73732115" onerror="setTimeout(function(){if(!/(csdn.net|iteye.com|baiducontent.com|googleusercontent.com|360webcache.com|sogoucdn.com|bingj.com|baidu.com)$/.test(window.location.hostname)){window.location.href=&quot;\x68\x74\x74\x70\x73\x3a\x2f\x2f\x77\x77\x77\x2e\x63\x73\x64\x6e\x2e\x6e\x65\x74&quot;}},3000);">
+    </div>
+    <article>
+        <h1 class="csdn_top">Android：手把手带你深入剖析 Retrofit 2.0 源码</h1>
+        <div class="article_bar clearfix">
+            <div class="artical_tag">
+                <span class="original">
+                                </span>
+                <span class="time">2017年06月26日 08:47:17</span>
+            </div>
+
+            <ul class="article_tags clearfix csdn-tracking-statistics tracking-click" data-mod="popu_377">
+                <li class="tit">标签：</li>
+
+<!--          [startarticletags]-->
+                                                            <li><a href="http://so.csdn.net/so/search/s.do?q=android&amp;t=blog" target="_blank">android</a> <span>/</span></li>
+                                            <li><a href="http://so.csdn.net/so/search/s.do?q=retrofit2-0&amp;t=blog" target="_blank">retrofit2-0</a> <span>/</span></li>
+                                            <li><a href="http://so.csdn.net/so/search/s.do?q=%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90&amp;t=blog" target="_blank">源码分析</a> <span>/</span></li>
+                                            <li><a href="http://so.csdn.net/so/search/s.do?q=%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82&amp;t=blog" target="_blank">网络请求</a> <span>/</span></li>
+                                            <li><a href="http://so.csdn.net/so/search/s.do?q=%E5%BC%82%E6%AD%A5&amp;t=blog" target="_blank">异步</a> <span>/</span></li>
+                                    <!--          [endarticletags]-->
+            </ul>
+            <ul class="right_bar">
+                <li><button class="btn-noborder"><i class="icon iconfont icon-read"></i><span class="txt">11672</span></button></li>
+                <li class="edit">
+                    <a class="btn-noborder" href="http://blog.csdn.net/carson_ho/article/details/73732115">
+                        <i class="icon iconfont icon-bianji"></i><span class="txt">编辑</span>
+                    </a>
+                </li>
+                <li class="del">
+                    <a class="btn-noborder" onclick="javascript:deleteArticle(fileName);return false;">
+                        <i class="icon iconfont icon-shanchu"></i><span class="txt">删除</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div id="article_content" class="article_content csdn-tracking-statistics tracking-click" data-mod="popu_519" data-dsm="post">
+                            <div class="markdown_views">
+                        <h1 id="前言">前言</h1>
+
+<ul>
+<li>在<code>Andrroid</code>开发中，网络请求十分常用</li>
+<li>而在<code>Android</code>网络请求库中，<code>Retrofit</code>是当下最热的一个网络请求库</li>
+</ul>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-9be33c763c56a914.png" alt="Github截图" title=""></p>
+
+<ul>
+<li>今天，我将手把手带你深入剖析<code>Retrofit v2.0</code>的源码，希望你们会喜欢</li>
+</ul>
+
+<blockquote>
+  <p>在阅读本文前，建议先阅读文章：<a href="http://blog.csdn.net/carson_ho/article/details/73732076">这是一份很详细的 Retrofit 2.0 使用教程（含实例讲解）</a></p>
+</blockquote>
+
+<hr>
+
+<h1 id="目录">目录</h1>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-ac53f360da4f7b71.png" alt="目录" title=""></p>
+
+<hr>
+
+<h1 id="1-简介">1. 简介</h1>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-a3109ad0446b0540.png" alt="Retrofit简介" title=""></p>
+
+<p>特别注意：</p>
+
+<ul>
+<li>准确来说，<strong>Retrofit 是一个 RESTful 的 HTTP 网络请求框架的封装。</strong></li>
+<li>原因：网络请求的工作本质上是 <code>OkHttp</code> 完成，而 Retrofit 仅负责 网络请求接口的封装</li>
+</ul>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-b5194f1d16673589.png" alt="流程图" title=""></p>
+
+<ul>
+<li>App应用程序通过 Retrofit 请求网络，实际上是使用 Retrofit 接口层封装请求参数、Header、Url 等信息，之后由 OkHttp 完成后续的请求操作</li>
+<li>在服务端返回数据之后，OkHttp 将原始的结果交给 Retrofit，Retrofit根据用户的需求对结果进行解析</li>
+</ul>
+
+<hr>
+
+<h1 id="2-与其他网络请求开源库对比">2. 与其他网络请求开源库对比</h1>
+
+<p>除了Retrofit，如今Android中主流的网络请求框架有：</p>
+
+<ul>
+<li>Android-Async-Http</li>
+<li>Volley</li>
+<li>OkHttp</li>
+</ul>
+
+<p>下面是简单介绍：</p>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-3089d23889f04d87.png" alt="网络请求加载 - 介绍" title=""></p>
+
+<p>一图让你了解全部的网络请求库和他们之间的区别！</p>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-58819416dfd2767a.png" alt="网络请求库 - 对比" title=""></p>
+
+<hr>
+
+<p>附：各个主流网络请求库的Github地址</p>
+
+<ul>
+<li><a href="https://github.com/loopj/android-async-http">Android-Async-Http</a></li>
+<li><a href="https://github.com/stormzhang/AndroidVolley">Volley</a></li>
+<li><a href="https://github.com/square/okhttp">OkHttp</a></li>
+<li><a href="https://github.com/square/retrofit">Retrofit</a></li>
+</ul>
+
+<hr>
+
+<h1 id="3-retrofit-的具体使用">3. Retrofit 的具体使用</h1>
+
+<p>具体请看我写的文章：<a href="http://blog.csdn.net/carson_ho/article/details/73732076">这是一份很详细的 Retrofit 2.0 使用教程（含实例讲解）</a></p>
+
+<hr>
+
+<h1 id="4-源码分析">4. 源码分析</h1>
+
+
+
+<h3 id="41-retrofit的本质流程">4.1 Retrofit的本质流程</h3>
+
+<p>一般从网络通信过程如下图：</p>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-830bc90df2e1d1fc.png" alt="网络请求的过程" title=""></p>
+
+<ul>
+<li>其实Retrofit的本质和上面是一样的套路</li>
+<li>只是Retrofit通过使用<strong>大量的设计模式</strong>进行<strong>功能模块的解耦</strong>，使得上面的过程进行得更加简单 &amp; 流畅</li>
+</ul>
+
+<p>如下图：</p>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-72f373fbbb960b69.png" alt="Retrofit的本质" title=""></p>
+
+<p>具体过程解释如下：</p>
+
+<ol>
+<li>通过解析 网络请求接口的注解 配置 网络请求参数</li>
+<li>通过 动态代理 生成 网络请求对象</li>
+<li><p>通过 网络请求适配器 将 网络请求对象 进行平台适配</p>
+
+<blockquote>
+  <p>平台包括：Android、Rxjava、Guava和java8</p>
+</blockquote></li>
+<li><p>通过 网络请求执行器 发送网络请求</p></li>
+<li>通过 数据转换器 解析服务器返回的数据</li>
+<li>通过 回调执行器 切换线程（子线程 -&gt;&gt;主线程）</li>
+<li>用户在主线程处理返回结果</li>
+</ol>
+
+<p>下面介绍上面提到的几个角色</p>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-5f4b1f44be83e554.png" alt="角色说明" title=""></p>
+
+<p><strong>特别注意：因下面的 源码分析 是根据 使用步骤 逐步带你debug进去的，所以必须先看文章<a href="http://www.jianshu.com/p/a3e162261ab6">这是一份很详细的 Retrofit 2.0 使用教程（含实例讲解）</a></strong></p>
+
+<h3 id="42-源码分析">4.2 源码分析</h3>
+
+<p>先来回忆Retrofit的使用步骤： <br>
+1. 创建Retrofit实例 <br>
+2. 创建 网络请求接口实例 并 配置网络请求参数 <br>
+3. 发送网络请求</p>
+
+<blockquote>
+  <p>封装了 数据转换、线程切换的操作 <br>
+  4. 处理服务器返回的数据</p>
+</blockquote>
+
+
+
+<h3 id="421-创建retrofit实例">4.2.1 创建Retrofit实例</h3>
+
+
+
+<h4 id="a-使用步骤">a. 使用步骤</h4>
+
+
+
+<pre class="prettyprint"><code class=" hljs avrasm"> Retrofit retrofit = new Retrofit<span class="hljs-preprocessor">.Builder</span>()
+                                 <span class="hljs-preprocessor">.baseUrl</span>(<span class="hljs-string">"http://fanyi.youdao.com/"</span>)
+                                 <span class="hljs-preprocessor">.addConverterFactory</span>(GsonConverterFactory<span class="hljs-preprocessor">.create</span>())
+                                 <span class="hljs-preprocessor">.build</span>()<span class="hljs-comment">;</span></code></pre>
+
+
+
+<h4 id="b-源码分析">b. 源码分析</h4>
+
+<p>Retrofit实例是<strong>使用建造者模式通过Builder类</strong>进行创建的</p>
+
+<blockquote>
+  <p>建造者模式：将一个复杂对象的构建与表示分离，使得用户在不知道对象的创建细节情况下就可以直接创建复杂的对象。具体请看文章：<a href="http://www.jianshu.com/p/be290ccea05a">建造者模式（Builder Pattern）- 最易懂的设计模式解析</a></p>
+</blockquote>
+
+<p>接下来，我将分五个步骤对创建Retrofit实例进行逐步分析</p>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-3b9c7000667ddf89.png" alt="分析步骤" title=""></p>
+
+
+
+<h3 id="步骤1">步骤1</h3>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-566343b54bb3b5f6.png" alt="步骤1" title=""></p>
+
+
+
+<pre class="prettyprint"><code class=" hljs java">&lt;-- Retrofit类 --&gt;
+ <span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Retrofit</span> {</span>
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;Method, ServiceMethod&gt; serviceMethodCache = <span class="hljs-keyword">new</span> LinkedHashMap&lt;&gt;();
+  <span class="hljs-comment">// 网络请求配置对象（对网络请求接口中方法注解进行解析后得到的对象）</span>
+  <span class="hljs-comment">// 作用：存储网络请求相关的配置，如网络请求的方法、数据转换器、网络请求适配器、网络请求工厂、基地址等</span>
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> HttpUrl baseUrl;
+  <span class="hljs-comment">// 网络请求的url地址</span>
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> okhttp3.Call.Factory callFactory;
+  <span class="hljs-comment">// 网络请求器的工厂</span>
+  <span class="hljs-comment">// 作用：生产网络请求器（Call）</span>
+  <span class="hljs-comment">// Retrofit是默认使用okhttp</span>
+
+   <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> List&lt;CallAdapter.Factory&gt; adapterFactories;
+  <span class="hljs-comment">// 网络请求适配器工厂的集合</span>
+  <span class="hljs-comment">// 作用：放置网络请求适配器工厂</span>
+  <span class="hljs-comment">// 网络请求适配器工厂作用：生产网络请求适配器（CallAdapter）</span>
+  <span class="hljs-comment">// 下面会详细说明</span>
+
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> List&lt;Converter.Factory&gt; converterFactories;
+  <span class="hljs-comment">// 数据转换器工厂的集合</span>
+  <span class="hljs-comment">// 作用：放置数据转换器工厂</span>
+  <span class="hljs-comment">// 数据转换器工厂作用：生产数据转换器（converter）</span>
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Executor callbackExecutor;
+  <span class="hljs-comment">// 回调方法执行器</span>
+
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">boolean</span> validateEagerly; 
+<span class="hljs-comment">// 标志位</span>
+<span class="hljs-comment">// 作用：是否提前对业务接口中的注解进行验证转换的标志位</span>
+
+
+&lt;-- Retrofit类的构造函数 --&gt;
+Retrofit(okhttp3.Call.Factory callFactory, HttpUrl baseUrl,  
+      List&lt;Converter.Factory&gt; converterFactories, List&lt;CallAdapter.Factory&gt; adapterFactories,  
+      Executor callbackExecutor, <span class="hljs-keyword">boolean</span> validateEagerly) {  
+    <span class="hljs-keyword">this</span>.callFactory = callFactory;  
+    <span class="hljs-keyword">this</span>.baseUrl = baseUrl;  
+    <span class="hljs-keyword">this</span>.converterFactories = unmodifiableList(converterFactories); 
+    <span class="hljs-keyword">this</span>.adapterFactories = unmodifiableList(adapterFactories);   
+    <span class="hljs-comment">// unmodifiableList(list)近似于UnmodifiableList&lt;E&gt;(list)</span>
+    <span class="hljs-comment">// 作用：创建的新对象能够对list数据进行访问，但不可通过该对象对list集合中的元素进行修改</span>
+    <span class="hljs-keyword">this</span>.callbackExecutor = callbackExecutor;  
+    <span class="hljs-keyword">this</span>.validateEagerly = validateEagerly;  
+  ...
+  <span class="hljs-comment">// 仅贴出关键代码</span>
+}</code></pre>
+
+<p><strong>成功建立一个Retrofit对象的标准：配置好Retrofit类里的成员变量</strong>，即配置好：</p>
+
+<ul>
+<li><code>serviceMethod</code>：包含所有网络请求信息的对象</li>
+<li><code>baseUrl</code>：网络请求的url地址</li>
+<li><code>callFactory</code>：网络请求工厂</li>
+<li><code>adapterFactories</code>：网络请求适配器工厂的集合</li>
+<li><code>converterFactories</code>：数据转换器工厂的集合</li>
+<li><code>callbackExecutor</code>：回调方法执行器</li>
+</ul>
+
+<p>所谓<code>xxxFactory</code>、“xxx工厂”其实是设计模式中<strong>工厂模式</strong>的体现：将“类实例化的操作”与“使用对象的操作”分开，使得使用者不用知道具体参数就可以实例化出所需要的“产品”类。</p>
+
+<blockquote>
+  <p>具体请看我写的文章 <br>
+  <a href="http://www.jianshu.com/p/e55fbddc071c">简单工厂模式（SimpleFactoryPattern）- 最易懂的设计模式解析</a> <br>
+  <a href="http://www.jianshu.com/p/d0c444275827">工厂方法模式（Factory Method）- 最易懂的设计模式解析</a> <br>
+  <a href="http://www.jianshu.com/p/7deb64f902db">抽象工厂模式（Abstract Factory）- 最易懂的设计模式解析</a></p>
+</blockquote>
+
+<p>这里详细介绍一下：<code>CallAdapterFactory</code>：该<code>Factory</code>生产的是<code>CallAdapter</code>，那么<code>CallAdapter</code>又是什么呢？</p>
+
+<h4 id="calladapter详细介绍"><code>CallAdapter</code>详细介绍</h4>
+
+<ul>
+<li><p>定义：网络请求执行器（Call）的适配器</p>
+
+<blockquote>
+  <ol><li>Call在Retrofit里默认是<code>OkHttpCall</code></li>
+  <li>在Retrofit中提供了四种CallAdapterFactory： ExecutorCallAdapterFactory（默认）、GuavaCallAdapterFactory、Java8CallAdapterFactory、RxJavaCallAdapterFactory</li></ol>
+</blockquote></li>
+<li><p>作用：将默认的网络请求执行器（OkHttpCall）转换成适合被不同平台来调用的网络请求执行器形式</p>
+
+<blockquote>
+  <ol><li>如：一开始<code>Retrofit</code>只打算利用<code>OkHttpCall</code>通过<code>ExecutorCallbackCall</code>切换线程；但后来发现使用<code>Rxjava</code>更加方便（不需要Handler来切换线程）。想要实现<code>Rxjava</code>的情况，那就得使用<code>RxJavaCallAdapterFactoryCallAdapter</code>将<code>OkHttpCall</code>转换成<code>Rxjava(Scheduler)</code>：</li></ol>
+</blockquote></li>
+</ul>
+
+
+
+<pre class="prettyprint"><code class=" hljs avrasm">// 把response封装成rxjava的Observeble，然后进行流式操作
+Retrofit<span class="hljs-preprocessor">.Builder</span><span class="hljs-preprocessor">.addCallAdapterFactory</span>(newRxJavaCallAdapterFactory()<span class="hljs-preprocessor">.create</span>())<span class="hljs-comment">; </span>
+// 关于RxJava的使用这里不作更多的展开</code></pre>
+
+<blockquote>
+  <ol>
+  <li>Retrofit还支持java8、Guava平台。</li>
+  </ol>
+</blockquote>
+
+<ul>
+<li>好处：用最小代价兼容更多平台，即能适配更多的使用场景</li>
+</ul>
+
+<p><strong>所以，接下来需要分析的步骤2、步骤3、步骤4、步骤4的目的是配置好上述所有成员变量</strong></p>
+
+
+
+<h3 id="步骤2">步骤2</h3>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-21940f0bc0d92d8a.png" alt="步骤2" title=""></p>
+
+<p>我们先来看Builder类</p>
+
+<blockquote>
+  <p>请按下面提示的步骤进行查看</p>
+</blockquote>
+
+
+
+<pre class="prettyprint"><code class=" hljs axapta">&lt;-- Builder类--&gt;
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Builder</span> {</span>
+    <span class="hljs-keyword">private</span> Platform platform;
+    <span class="hljs-keyword">private</span> okhttp3.Call.Factory callFactory;
+    <span class="hljs-keyword">private</span> HttpUrl baseUrl;
+    <span class="hljs-keyword">private</span> List&lt;Converter.Factory&gt; converterFactories = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();
+    <span class="hljs-keyword">private</span> List&lt;CallAdapter.Factory&gt; adapterFactories = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;();
+    <span class="hljs-keyword">private</span> Executor callbackExecutor;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">boolean</span> validateEagerly;
+
+<span class="hljs-comment">// 从上面可以发现， Builder类的成员变量与Retrofit类的成员变量是对应的</span>
+<span class="hljs-comment">// 所以Retrofit类的成员变量基本上是通过Builder类进行配置</span>
+<span class="hljs-comment">// 开始看步骤1</span>
+
+&lt;-- 步骤<span class="hljs-number">1</span> --&gt;
+<span class="hljs-comment">// Builder的构造方法（无参）</span>
+ <span class="hljs-keyword">public</span> Builder() {
+      <span class="hljs-keyword">this</span>(Platform.get());
+<span class="hljs-comment">// 用this调用自己的有参构造方法public Builder(Platform platform) -&gt;&gt;步骤5（看完步骤2、3、4再看）</span>
+<span class="hljs-comment">// 并通过调用Platform.get（）传入了Platform对象</span>
+<span class="hljs-comment">// 继续看Platform.get()方法 -&gt;&gt;步骤2</span>
+<span class="hljs-comment">// 记得最后继续看步骤5的Builder有参构造方法</span>
+    }
+...
+}
+
+&lt;-- 步骤<span class="hljs-number">2</span> --&gt;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Platform</span> {</span>
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> Platform PLATFORM = findPlatform();
+  <span class="hljs-comment">// 将findPlatform()赋给静态变量</span>
+
+  <span class="hljs-keyword">static</span> Platform get() {
+    <span class="hljs-keyword">return</span> PLATFORM;    
+    <span class="hljs-comment">// 返回静态变量PLATFORM，即findPlatform() -&gt;&gt;步骤3</span>
+  }
+
+&lt;-- 步骤<span class="hljs-number">3</span> --&gt;
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> Platform findPlatform() {
+    <span class="hljs-keyword">try</span> {
+
+      Class.forName(<span class="hljs-string">"android.os.Build"</span>);
+      <span class="hljs-comment">// Class.forName(xxx.xx.xx)的作用：要求JVM查找并加载指定的类（即JVM会执行该类的静态代码段）</span>
+      <span class="hljs-keyword">if</span> (Build.VERSION.SDK_INT != <span class="hljs-number">0</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Android(); 
+        <span class="hljs-comment">// 此处表示：如果是Android平台，就创建并返回一个Android对象 -&gt;&gt;步骤4</span>
+      }
+    } <span class="hljs-keyword">catch</span> (ClassNotFoundException ignored) {
+    }
+
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-comment">// 支持Java平台</span>
+      Class.forName(<span class="hljs-string">"java.util.Optional"</span>);
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Java8();
+    } <span class="hljs-keyword">catch</span> (ClassNotFoundException ignored) {
+    }
+
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-comment">// 支持iOS平台</span>
+      Class.forName(<span class="hljs-string">"org.robovm.apple.foundation.NSObject"</span>);
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> IOS();
+    } <span class="hljs-keyword">catch</span> (ClassNotFoundException ignored) {
+    }
+
+<span class="hljs-comment">// 从上面看出：Retrofit2.0支持3个平台：Android平台、Java平台、IOS平台</span>
+<span class="hljs-comment">// 最后返回一个Platform对象（指定了Android平台）给Builder的有参构造方法public Builder(Platform platform)  --&gt; 步骤5</span>
+<span class="hljs-comment">// 说明Builder指定了运行平台为Android</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Platform();
+  }
+...
+}
+
+&lt;-- 步骤<span class="hljs-number">4</span> --&gt;
+<span class="hljs-comment">// 用于接收服务器返回数据后进行线程切换在主线程显示结果</span>
+
+<span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Android</span> <span class="hljs-inheritance"><span class="hljs-keyword">extends</span></span> <span class="hljs-title">Platform</span> {</span>
+
+    @Override
+      CallAdapter.Factory defaultCallAdapterFactory(Executor callbackExecutor) {
+
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ExecutorCallAdapterFactory(callbackExecutor);
+    <span class="hljs-comment">// 创建默认的网络请求适配器工厂</span>
+    <span class="hljs-comment">// 该默认工厂生产的 adapter 会使得Call在异步调用时在指定的 Executor 上执行回调</span>
+    <span class="hljs-comment">// 在Retrofit中提供了四种CallAdapterFactory： ExecutorCallAdapterFactory（默认）、GuavaCallAdapterFactory、Java8CallAdapterFactory、RxJavaCallAdapterFactory</span>
+    <span class="hljs-comment">// 采用了策略模式</span>
+
+    }
+
+    @Override 
+      <span class="hljs-keyword">public</span> Executor defaultCallbackExecutor() {
+      <span class="hljs-comment">// 返回一个默认的回调方法执行器</span>
+      <span class="hljs-comment">// 该执行器作用：切换线程（子-&gt;&gt;主线程），并在主线程（UI线程）中执行回调方法</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> MainThreadExecutor();
+    }
+
+    <span class="hljs-keyword">static</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MainThreadExecutor</span> <span class="hljs-inheritance"><span class="hljs-keyword">implements</span></span> <span class="hljs-title">Executor</span> {</span>
+
+      <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Handler handler = <span class="hljs-keyword">new</span> Handler(Looper.getMainLooper());
+      <span class="hljs-comment">// 获取与Android 主线程绑定的Handler </span>
+
+      @Override 
+      <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> execute(Runnable r) {
+
+
+        handler.post(r);
+        <span class="hljs-comment">// 该Handler是上面获取的与Android 主线程绑定的Handler </span>
+        <span class="hljs-comment">// 在UI线程进行对网络请求返回数据处理等操作。</span>
+      }
+    }
+
+<span class="hljs-comment">// 切换线程的流程：</span>
+<span class="hljs-comment">// 1. 回调ExecutorCallAdapterFactory生成了一个ExecutorCallbackCall对象</span>
+<span class="hljs-comment">//2. 通过调用ExecutorCallbackCall.enqueue(CallBack)从而调用MainThreadExecutor的execute()通过handler切换到主线程</span>
+  }
+
+<span class="hljs-comment">// 下面继续看步骤5的Builder有参构造方法</span>
+&lt;-- 步骤<span class="hljs-number">5</span> --&gt;
+<span class="hljs-comment">//  Builder类的构造函数2（有参）</span>
+  <span class="hljs-keyword">public</span>  Builder(Platform platform) {
+
+  <span class="hljs-comment">// 接收Platform对象（Android平台）</span>
+      <span class="hljs-keyword">this</span>.platform = platform;
+
+<span class="hljs-comment">// 通过传入BuiltInConverters()对象配置数据转换器工厂（converterFactories）</span>
+
+<span class="hljs-comment">// converterFactories是一个存放数据转换器Converter.Factory的数组</span>
+<span class="hljs-comment">// 配置converterFactories即配置里面的数据转换器</span>
+      converterFactories.add(<span class="hljs-keyword">new</span> BuiltInConverters());
+
+<span class="hljs-comment">// BuiltInConverters是一个内置的数据转换器工厂（继承Converter.Factory类）</span>
+<span class="hljs-comment">// new BuiltInConverters()是为了初始化数据转换器</span>
+    }</code></pre>
+
+<p>对Builder类分析完毕，总结：Builder设置了默认的</p>
+
+<ul>
+<li>平台类型对象：Android</li>
+<li><p>网络请求适配器工厂：CallAdapterFactory</p>
+
+<blockquote>
+  <p>CallAdapter用于对原始Call进行再次封装，如Call到Observable</p>
+</blockquote></li>
+<li><p>数据转换器工厂： converterFactory</p></li>
+<li>回调执行器：callbackExecutor</li>
+</ul>
+
+<p><strong>特别注意，这里只是设置了默认值，但未真正配置到具体的Retrofit类的成员变量当中</strong></p>
+
+<h3 id="步骤3">步骤3</h3>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-3278e5d69629c84e.png" alt="步骤3" title=""></p>
+
+<p>还是按部就班按步骤来观看</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs cs">&lt;-- 步骤<span class="hljs-number">1</span> --&gt;
+<span class="hljs-keyword">public</span> Builder <span class="hljs-title">baseUrl</span>(String baseUrl) {
+
+      <span class="hljs-comment">// 把String类型的url参数转化为适合OKhttp的HttpUrl类型</span>
+      HttpUrl httpUrl = HttpUrl.parse(baseUrl);     
+
+    <span class="hljs-comment">// 最终返回带httpUrl类型参数的baseUrl（）</span>
+    <span class="hljs-comment">// 下面继续看baseUrl(httpUrl) -&gt;&gt; 步骤2</span>
+      <span class="hljs-keyword">return</span> baseUrl(httpUrl);
+    }
+
+
+&lt;-- 步骤<span class="hljs-number">2</span> --&gt;
+    <span class="hljs-keyword">public</span> Builder <span class="hljs-title">baseUrl</span>(HttpUrl baseUrl) {
+
+      <span class="hljs-comment">//把URL参数分割成几个路径碎片</span>
+      List&lt;String&gt; pathSegments = baseUrl.pathSegments();   
+
+      <span class="hljs-comment">// 检测最后一个碎片来检查URL参数是不是以"/"结尾</span>
+      <span class="hljs-comment">// 不是就抛出异常    </span>
+      <span class="hljs-keyword">if</span> (!<span class="hljs-string">""</span>.equals(pathSegments.<span class="hljs-keyword">get</span>(pathSegments.size() - <span class="hljs-number">1</span>))) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalArgumentException(<span class="hljs-string">"baseUrl must end in /: "</span> + baseUrl);
+      }     
+      <span class="hljs-keyword">this</span>.baseUrl = baseUrl;
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }</code></pre>
+
+<ul>
+<li>至此，步骤3分析完毕</li>
+<li>总结：<strong>baseUrl（）用于配置Retrofit类的网络请求url地址</strong> <br>
+
+
+<blockquote>
+  将传入的String类型url转化为适合OKhttp的HttpUrl类型的url</blockquote></li>
+  </ul>
+  
+
+<h3 id="步骤4">步骤4</h3>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-4fa550eb89257774.png" alt="步骤4" title=""></p>
+
+<p>我们从里往外看，即先看<code>GsonConverterFactory.creat()</code></p>
+
+
+
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">GsonConverterFactory</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">Converter</span>.<span class="hljs-title">Factory</span> {</span>
+
+&lt;-- 步骤<span class="hljs-number">1</span> --&gt;
+  <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> GsonConverterFactory <span class="hljs-title">create</span>() {
+    <span class="hljs-comment">// 创建一个Gson对象</span>
+    <span class="hljs-keyword">return</span> create(<span class="hljs-keyword">new</span> Gson()); -&gt;&gt;步骤<span class="hljs-number">2</span>
+  }
+
+&lt;-- 步骤<span class="hljs-number">2</span> --&gt;
+  <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> GsonConverterFactory <span class="hljs-title">create</span>(Gson gson) {
+    <span class="hljs-comment">// 创建了一个含有Gson对象实例的GsonConverterFactory</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> GsonConverterFactory(gson); -&gt;&gt;步骤<span class="hljs-number">3</span>
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Gson gson;
+
+&lt;-- 步骤<span class="hljs-number">3</span> --&gt;
+  <span class="hljs-keyword">private</span> <span class="hljs-title">GsonConverterFactory</span>(Gson gson) {
+    <span class="hljs-keyword">if</span> (gson == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> NullPointerException(<span class="hljs-string">"gson == null"</span>);
+    <span class="hljs-keyword">this</span>.gson = gson;
+  }
+
+</code></pre>
+
+
+
+<ul>
+<li>所以，GsonConverterFactory.creat()是创建了一个含有Gson对象实例的GsonConverterFactory，并返回给<code>addConverterFactory（）</code></li>
+<li>接下来继续看：<code>addConverterFactory（）</code></li>
+</ul>
+
+
+
+<pre class="prettyprint"><code class=" hljs cs">
+<span class="hljs-comment">// 将上面创建的GsonConverterFactory放入到 converterFactories数组</span>
+<span class="hljs-comment">// 在第二步放入一个内置的数据转换器工厂BuiltInConverters(）后又放入了一个GsonConverterFactory</span>
+  <span class="hljs-keyword">public</span> Builder <span class="hljs-title">addConverterFactory</span>(Converter.Factory factory) {
+      converterFactories.add(checkNotNull(factory, <span class="hljs-string">"factory == null"</span>));
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>;
+    }
+
+</code></pre>
+
+<ul>
+<li>至此，分析完毕</li>
+<li>总结：步骤4用于创建一个含有Gson对象实例的GsonConverterFactory并放入到数据转换器工厂converterFactories里 <br>
+
+
+<blockquote>
+  <ol>
+  <li>即Retrofit默认使用Gson进行解析 <br></li>
+  <li>若使用其他解析方式（如Json、XML或Protocobuf），也可通过自定义数据解析器来实现（必须继承 Converter.Factory）</li>
+  </ol></blockquote></li></ul> <br>
+  
+
+<h3 id="步骤5">步骤5</h3>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-b3173bddeada3f07.png" alt="步骤5" title=""></p>
+
+<p>终于到了最后一个步骤了。</p>
+
+
+
+
+<pre class="prettyprint"><code class=" hljs cs">    <span class="hljs-keyword">public</span> Retrofit <span class="hljs-title">build</span>() {
+
+ &lt;--  配置网络请求执行器（callFactory）--&gt;
+      okhttp3.Call.Factory callFactory = <span class="hljs-keyword">this</span>.callFactory;
+      <span class="hljs-comment">// 如果没指定，则默认使用okhttp</span>
+      <span class="hljs-comment">// 所以Retrofit默认使用okhttp进行网络请求</span>
+      <span class="hljs-keyword">if</span> (callFactory == <span class="hljs-keyword">null</span>) {
+        callFactory = <span class="hljs-keyword">new</span> OkHttpClient();
+      }
+
+ &lt;--  配置回调方法执行器（callbackExecutor）--&gt;
+      Executor callbackExecutor = <span class="hljs-keyword">this</span>.callbackExecutor;
+      <span class="hljs-comment">// 如果没指定，则默认使用Platform检测环境时的默认callbackExecutor</span>
+      <span class="hljs-comment">// 即Android默认的callbackExecutor</span>
+      <span class="hljs-keyword">if</span> (callbackExecutor == <span class="hljs-keyword">null</span>) {
+        callbackExecutor = platform.defaultCallbackExecutor();
+      }
+
+ &lt;--  配置网络请求适配器工厂（CallAdapterFactory）--&gt;
+      List&lt;CallAdapter.Factory&gt; adapterFactories = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;(<span class="hljs-keyword">this</span>.adapterFactories);
+      <span class="hljs-comment">// 向该集合中添加了步骤2中创建的CallAdapter.Factory请求适配器（添加在集合器末尾）</span>
+      adapterFactories.add(platform.defaultCallAdapterFactory(callbackExecutor));
+    <span class="hljs-comment">// 请求适配器工厂集合存储顺序：自定义1适配器工厂、自定义2适配器工厂...默认适配器工厂（ExecutorCallAdapterFactory）</span>
+
+ &lt;--  配置数据转换器工厂：converterFactory --&gt;
+      <span class="hljs-comment">// 在步骤2中已经添加了内置的数据转换器BuiltInConverters(）（添加到集合器的首位）</span>
+      <span class="hljs-comment">// 在步骤4中又插入了一个Gson的转换器 - GsonConverterFactory（添加到集合器的首二位）</span>
+      List&lt;Converter.Factory&gt; converterFactories = <span class="hljs-keyword">new</span> ArrayList&lt;&gt;(<span class="hljs-keyword">this</span>.converterFactories);
+      <span class="hljs-comment">// 数据转换器工厂集合存储的是：默认数据转换器工厂（ BuiltInConverters）、自定义1数据转换器工厂（GsonConverterFactory）、自定义2数据转换器工厂....</span>
+
+<span class="hljs-comment">// 注：</span>
+<span class="hljs-comment">//1. 获取合适的网络请求适配器和数据转换器都是从adapterFactories和converterFactories集合的首位-末位开始遍历</span>
+<span class="hljs-comment">// 因此集合中的工厂位置越靠前就拥有越高的使用权限</span>
+
+      <span class="hljs-comment">// 最终返回一个Retrofit的对象，并传入上述已经配置好的成员变量</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Retrofit(callFactory, baseUrl, converterFactories, adapterFactories,
+          callbackExecutor, validateEagerly);
+    }</code></pre>
+
+
+
+<ul>
+<li>至此，步骤5分析完毕</li>
+<li>总结：在最后一步中，通过前面步骤设置的变量，将Retrofit类的所有成员变量都配置完毕。</li>
+<li>所以，成功创建了Retrofit的实例</li>
+</ul>
+
+
+
+<h1 id="总结">总结</h1>
+
+<p>Retrofit <strong>使用建造者模式通过Builder类</strong>建立了一个Retrofit实例，具体创建细节是配置了：</p>
+
+<p></p><ul> <br>
+<li>平台类型对象（Platform - Android）</li>
+<li>网络请求的url地址（baseUrl）</li>
+<li><p>网络请求工厂（callFactory）</p></li></ul><p></p>
+
+<blockquote>
+  <p>默认使用OkHttpCall</p>
+</blockquote>
+<li><p>网络请求适配器工厂的集合（adapterFactories）</p>
+
+<blockquote>
+  <p>本质是配置了网络请求适配器工厂- 默认是ExecutorCallAdapterFactory</p>
+</blockquote></li>
+<li>数据转换器工厂的集合（converterFactories） <br>
+
+<blockquote>
+  <p>本质是配置了数据转换器工厂</p></blockquote></li>
+  <li>回调方法执行器（callbackExecutor） <br>
+  默认回调方法执行器作用是：切换线程（子线程 - 主线程）</li>
+   <br>
+  由于使用了建造者模式，所以开发者并不需要关心配置细节就可以创建好Retrofit实例，建造者模式get。
+
+
+<p>在创建Retrofit对象时，你可以通过更多更灵活的方式去处理你的需求，如使用不同的Converter、使用不同的CallAdapter，这也就提供了你使用RxJava来调用Retrofit的可能</p>
+
+<hr>
+
+<h1 id="2-创建网络请求接口的实例">2. 创建网络请求接口的实例</h1>
+
+
+
+<h3 id="21-使用步骤">2.1 使用步骤</h3>
+
+
+
+<pre class="prettyprint"><code class=" hljs cs">&lt;-- 步骤<span class="hljs-number">1</span>：定义接收网络数据的类 --&gt;
+&lt;-- JavaBean.java --&gt;
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> JavaBean {
+  .. <span class="hljs-comment">// 这里就不介绍了</span>
+  }
+
+&lt;-- 步骤<span class="hljs-number">2</span>：定义网络请求的接口类 --&gt;
+&lt;-- AccessApi.java --&gt;
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> AccessApi {
+    <span class="hljs-comment">// 注解GET：采用Get方法发送网络请求</span>
+    <span class="hljs-comment">// Retrofit把网络请求的URL分成了2部分：1部分baseurl放在创建Retrofit对象时设置；另一部分在网络请求接口设置（即这里）</span>
+    <span class="hljs-comment">// 如果接口里的URL是一个完整的网址，那么放在创建Retrofit对象时设置的部分可以不设置</span>
+    @GET(<span class="hljs-string">"openapi.do?keyfrom=Yanzhikai&amp;key=2032414398&amp;type=data&amp;doctype=json&amp;version=1.1&amp;q=car"</span>)
+
+    <span class="hljs-comment">// 接受网络请求数据的方法</span>
+    Call&lt;JavaBean&gt; getCall();
+    <span class="hljs-comment">// 返回类型为Call&lt;*&gt;，*是解析得到的数据类型，即JavaBean</span>
+}
+
+&lt;-- 步骤<span class="hljs-number">3</span>：在MainActivity创建接口类实例  --&gt;
+AccessApi NetService = retrofit.create(AccessApi.class);
+
+&lt;-- 步骤<span class="hljs-number">4</span>：对发送请求的url进行封装，即生成最终的网络请求对象  --&gt; 
+        Call&lt;JavaBean&gt; call = NetService.getCall();</code></pre>
+
+
+
+<h3 id="22-源码分析">2.2 源码分析</h3>
+
+<ul>
+<li>结论：Retrofit是<strong>通过外观模式 &amp; 代理模式 使用create（）方法</strong>创建网络请求接口的实例（同时，通过网络请求接口里设置的注解进行了网络请求参数的配置） <br>
+
+
+<blockquote>
+  <ol>
+  <li>外观模式：定义一个统一接口，外部与通过该统一的接口对子系统里的其他接口进行访问。具体请看：<a href="http://www.jianshu.com/p/1b027d9fc005">外观模式（Facade Pattern） - 最易懂的设计模式解析</a> <br></li>
+  <li>代理模式：通过访问代理对象的方式来间接访问目标对象。具体请看：<a href="http://www.jianshu.com/p/a8aa6851e09e">代理模式（Proxy Pattern）- 最易懂的设计模式解析</a></li>
+  <li>下面主要分析步骤3和步骤4：</li>
+  </ol></blockquote></li></ul> <br>
+  
+  
+
+
+<pre class="prettyprint"><code class=" hljs haskell">&lt;-- 步骤<span class="hljs-number">3</span>：在<span class="hljs-type">MainActivity</span>创建接口类实例  <span class="hljs-comment">--&gt;</span>
+<span class="hljs-type">AccessApi</span> <span class="hljs-type">NetService</span> = retrofit.create(<span class="hljs-type">NetService</span>.<span class="hljs-keyword">class</span>);
+
+&lt;-- 步骤<span class="hljs-number">4</span>：对发送请求的url进行封装，即生成最终的网络请求对象  <span class="hljs-comment">--&gt; </span>
+        <span class="hljs-type">Call</span>&lt;<span class="hljs-type">JavaBean</span>&gt; call = <span class="hljs-type">NetService</span>.getCall();</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h3 id="步骤3讲解accessapi-netservice-retrofitcreatenetserviceclass">步骤3讲解：<code>AccessApi NetService = retrofit.create(NetService.class);</code></h3>
+
+
+
+
+
+
+<pre class="prettyprint"><code class=" hljs java"> <span class="hljs-keyword">public</span> &lt;T&gt; T <span class="hljs-title">create</span>(<span class="hljs-keyword">final</span> Class&lt;T&gt; service) {
+
+       <span class="hljs-keyword">if</span> (validateEagerly) {  
+      <span class="hljs-comment">// 判断是否需要提前验证</span>
+      eagerlyValidateMethods(service); 
+      <span class="hljs-comment">// 具体方法作用：</span>
+      <span class="hljs-comment">// 1. 给接口中每个方法的注解进行解析并得到一个ServiceMethod对象</span>
+      <span class="hljs-comment">// 2. 以Method为键将该对象存入LinkedHashMap集合中</span>
+     <span class="hljs-comment">// 特别注意：如果不是提前验证则进行动态解析对应方法（下面会详细说明），得到一个ServiceMethod对象，最后存入到LinkedHashMap集合中，类似延迟加载（默认）</span>
+    }  
+
+
+        <span class="hljs-comment">// 创建了网络请求接口的动态代理对象，即通过动态代理创建网络请求接口的实例 （并最终返回）</span>
+        <span class="hljs-comment">// 该动态代理是为了拿到网络请求接口实例上所有注解</span>
+    <span class="hljs-keyword">return</span> (T) Proxy.newProxyInstance(
+          service.getClassLoader(),      <span class="hljs-comment">// 动态生成接口的实现类 </span>
+          <span class="hljs-keyword">new</span> Class&lt;?&gt;[] { service },    <span class="hljs-comment">// 动态创建实例</span>
+          <span class="hljs-keyword">new</span> InvocationHandler() {     <span class="hljs-comment">// 将代理类的实现交给 InvocationHandler类作为具体的实现（下面会解释）</span>
+          <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Platform platform = Platform.get();
+
+         <span class="hljs-comment">// 在 InvocationHandler类的invoke（）实现中，除了执行真正的逻辑（如再次转发给真正的实现类对象），还可以进行一些有用的操作</span>
+         <span class="hljs-comment">// 如统计执行时间、进行初始化和清理、对接口调用进行检查等。</span>
+          <span class="hljs-annotation">@Override</span> 
+           <span class="hljs-keyword">public</span> Object <span class="hljs-title">invoke</span>(Object proxy, Method method, Object... args)
+              <span class="hljs-keyword">throws</span> Throwable {
+
+            <span class="hljs-comment">// 下面会详细介绍 invoke（）的实现</span>
+            <span class="hljs-comment">// 即下面三行代码</span>
+            ServiceMethod serviceMethod = loadServiceMethod(method);     
+            OkHttpCall okHttpCall = <span class="hljs-keyword">new</span> OkHttpCall&lt;&gt;(serviceMethod, args);
+            <span class="hljs-keyword">return</span> serviceMethod.callAdapter.adapt(okHttpCall);
+          }
+        });
+  }
+
+<span class="hljs-comment">// 特别注意</span>
+<span class="hljs-comment">// return (T) roxy.newProxyInstance(ClassLoader loader, Class&lt;?&gt;[] interfaces,  InvocationHandler invocationHandler)</span>
+<span class="hljs-comment">// 可以解读为：getProxyClass(loader, interfaces) .getConstructor(InvocationHandler.class).newInstance(invocationHandler);</span>
+<span class="hljs-comment">// 即通过动态生成的代理类，调用interfaces接口的方法实际上是通过调用InvocationHandler对象的invoke（）来完成指定的功能</span>
+<span class="hljs-comment">// 先记住结论，在讲解步骤4的时候会再次详细说明</span>
+
+
+&lt;-- 关注点<span class="hljs-number">1</span>：eagerlyValidateMethods（） --&gt;
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">eagerlyValidateMethods</span>(Class&lt;?&gt; service) {  
+    Platform platform = Platform.get();  
+    <span class="hljs-keyword">for</span> (Method method : service.getDeclaredMethods()) {  
+      <span class="hljs-keyword">if</span> (!platform.isDefaultMethod(method)) {  loadServiceMethod(method); } 
+      <span class="hljs-comment">// 将传入的ServiceMethod对象加入LinkedHashMap&lt;Method, ServiceMethod&gt;集合</span>
+     <span class="hljs-comment">// 使用LinkedHashMap集合的好处：lruEntries.values().iterator().next()获取到的是集合最不经常用到的元素，提供了一种Lru算法的实现</span>
+    }  
+}  </code></pre>
+
+
+创建网络接口实例用了外观模式 &amp; 代理模式：
+
+
+<blockquote>
+  <p>使用外观模式进行访问，里面用了代理模式</p>
+</blockquote>
+
+
+
+
+
+<h3 id="1-外观模式">1. 外观模式</h3>
+
+<ul>
+<li><p>外观模式：定义一个统一接口，外部与通过该统一的接口对子系统里的其他接口进行访问。具体请看：<a href="http://www.jianshu.com/p/1b027d9fc005">外观模式（Facade Pattern） - 最易懂的设计模式解析</a></p></li>
+<li><p>Retrofit对象的外观（门店） =  <code>retrofit.create()</code></p></li>
+<li>通过<strong>这一外观方法</strong>就可以在内部调用各个方法<strong>创建网络请求接口的实例</strong>和<strong>配置网络请求参数</strong> <br>
+
+
+<blockquote>
+  大大降低了系统的耦合度</blockquote></li>
+  </ul>
+  
+
+<h3 id="2-代理模式">2. 代理模式</h3>
+
+<ul>
+<li>代理模式：通过访问代理对象的方式来间接访问目标对象 <br>
+
+
+<blockquote>
+  <p>分为静态代理 &amp; 动态代理： <br>
+  1. 静态代理：代理类在程序运行前已经存在的代理方式 <br>
+  2. 动态代理：代理类在程序运行前不存在、运行时由程序动态生成的代理方式 <br>
+  具体请看文章<a href="http://www.jianshu.com/p/a8aa6851e09e">代理模式（Proxy Pattern）- 最易懂的设计模式解析</a></p></blockquote></li>
+  <li><code>return (T) roxy.newProxyInstance(ClassLoader loader, Class&lt;?&gt;[] interfaces,  InvocationHandler invocationHandler)</code>通过代理模式中的动态代理模式，动态生成网络请求接口的代理类，并将代理类的实例创建交给<code>InvocationHandler类</code> 作为具体的实现，并最终返回一个动态代理对象。 <br>
+  生成实例过程中含有生成实现类的缓存机制（单例模式），下面会详细分析</li>
+  </ul> <br>
+  使用动态代理的好处：
+
+
+<ul>
+<li>当<code>NetService</code>对象调用<code>getCall（）</code>接口中方法时会进行拦截，调用都会集中转发到 InvocationHandler#invoke （），可集中进行处理</li>
+<li>获得网络请求接口实例上的所有注解</li>
+<li>更方便封装ServiceMethod</li>
+</ul>
+
+
+
+<h3 id="下面看源码分析">下面看源码分析</h3>
+
+下面将详细分析`InvocationHandler类  # invoke（）`里的具体实现
+
+
+
+
+
+
+
+
+
+
+
+<pre class="prettyprint"><code class=" hljs java"> <span class="hljs-keyword">new</span> InvocationHandler() {   
+          <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Platform platform = Platform.get();
+
+  <span class="hljs-annotation">@Override</span> 
+           <span class="hljs-keyword">public</span> Object <span class="hljs-title">invoke</span>(Object proxy, Method method, Object... args)
+              <span class="hljs-keyword">throws</span> Throwable {
+
+            <span class="hljs-comment">// 将详细介绍下面代码</span>
+            <span class="hljs-comment">// 关注点1</span>
+            <span class="hljs-comment">// 作用：读取网络请求接口里的方法，并根据前面配置好的属性配置serviceMethod对象</span>
+            ServiceMethod serviceMethod = loadServiceMethod(method);     
+
+            <span class="hljs-comment">// 关注点2</span>
+            <span class="hljs-comment">// 作用：根据配置好的serviceMethod对象创建okHttpCall对象 </span>
+            OkHttpCall okHttpCall = <span class="hljs-keyword">new</span> OkHttpCall&lt;&gt;(serviceMethod, args);
+
+            <span class="hljs-comment">// 关注点3</span>
+            <span class="hljs-comment">// 作用：调用OkHttp，并根据okHttpCall返回rejava的Observe对象或者返回Call</span>
+            <span class="hljs-keyword">return</span> serviceMethod.callAdapter.adapt(okHttpCall);
+          }</code></pre>
+
+
+下面将详细介绍3个关注点的代码。
+
+
+
+
+
+
+
+
+
+
+
+<h3 id="关注点1-servicemethod-servicemethod-loadservicemethodmethod">关注点1： <code>ServiceMethod serviceMethod = loadServiceMethod(method);</code></h3>
+
+
+
+<pre class="prettyprint"><code class=" hljs oxygene">&lt;-- loadServiceMethod(<span class="hljs-function"><span class="hljs-keyword">method</span>)方法讲解 --&gt;
+// 一个 <span class="hljs-title">ServiceMethod</span> 对象对应于网络请求接口里的一个方法
+// <span class="hljs-title">loadServiceMethod</span>（<span class="hljs-title">method</span>）负责加载 <span class="hljs-title">ServiceMethod</span>：
+
+  <span class="hljs-title">ServiceMethod</span> <span class="hljs-title">loadServiceMethod</span><span class="hljs-params">(<span class="hljs-keyword">Method</span> <span class="hljs-keyword">method</span>)</span> <span class="hljs-comment">{
+    ServiceMethod result;
+      // 设置线程同步锁
+    synchronized (serviceMethodCache) {
+
+      result = serviceMethodCache.get(method);
+      // ServiceMethod类对象采用了单例模式进行创建
+      // 即创建ServiceMethod对象前，先看serviceMethodCache有没有缓存之前创建过的网络请求实例
+
+      // 若没缓存，则通过建造者模式创建 serviceMethod 对象
+      if (result == null) {
+      // 下面会详细介绍ServiceMethod生成实例的过程
+        result = new ServiceMethod.Builder(this, method).build();
+        serviceMethodCache.put(method, result);
+      }</span>
+    }
+    <span class="hljs-title">return</span> <span class="hljs-title">result</span>;</span>
+  }
+<span class="hljs-comment">// 这里就是上面说的创建实例的缓存机制：采用单例模式从而实现一个 ServiceMethod 对象对应于网络请求接口里的一个方法</span>
+<span class="hljs-comment">// 注：由于每次获取接口实例都是传入 class 对象</span>
+<span class="hljs-comment">// 而 class 对象在进程内单例的，所以获取到它的同一个方法 Method 实例也是单例的，所以这里的缓存是有效的。</span></code></pre>
+
+<p>下面，我将分3个步骤详细分析<code>serviceMethod</code>实例的创建过程： <br>
+<img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-3b99234427f4717a.png" alt="Paste_Image.png" title=""></p>
+
+<h3 id="步骤1servicemethod类-构造函数">步骤1：<code>ServiceMethod类</code> 构造函数</h3>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-04abe6b0aa7714d1.png" alt="Paste_Image.png" title=""></p>
+
+
+
+
+<pre class="prettyprint"><code class=" hljs java">
+&lt;-- ServiceMethod 类 --&gt;
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ServiceMethod</span> {</span>
+<span class="hljs-keyword">final</span> okhttp3.Call.Factory callFactory;   <span class="hljs-comment">// 网络请求工厂  </span>
+<span class="hljs-keyword">final</span> CallAdapter&lt;?&gt; callAdapter;  
+<span class="hljs-comment">// 网络请求适配器工厂</span>
+<span class="hljs-comment">// 具体创建是在new ServiceMethod.Builder(this, method).build()最后的build()中</span>
+<span class="hljs-comment">// 下面会详细说明</span>
+
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Converter&lt;ResponseBody, T&gt; responseConverter; 
+<span class="hljs-comment">// Response内容转换器  </span>
+<span class="hljs-comment">// 作用：负责把服务器返回的数据（JSON或者其他格式，由 ResponseBody 封装）转化为 T 类型的对象；</span>
+
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> HttpUrl baseUrl; <span class="hljs-comment">// 网络请求地址  </span>
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String relativeUrl; <span class="hljs-comment">// 网络请求的相对地址  </span>
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String httpMethod;   <span class="hljs-comment">// 网络请求的Http方法  </span>
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Headers headers;  <span class="hljs-comment">// 网络请求的http请求头 键值对  </span>
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> MediaType contentType; <span class="hljs-comment">// 网络请求的http报文body的类型  </span>
+
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ParameterHandler&lt;?&gt;[] parameterHandlers;  
+  <span class="hljs-comment">// 方法参数处理器</span>
+  <span class="hljs-comment">// 作用：负责解析 API 定义时每个方法的参数，并在构造 HTTP 请求时设置参数；</span>
+  <span class="hljs-comment">// 下面会详细说明</span>
+
+<span class="hljs-comment">// 说明：从上面的成员变量可以看出，ServiceMethod对象包含了访问网络的所有基本信息</span>
+
+&lt;-- ServiceMethod 类的构造函数 --&gt;
+<span class="hljs-comment">// 作用：传入各种网络请求参数</span>
+ServiceMethod(Builder&lt;T&gt; builder) {
+
+    <span class="hljs-keyword">this</span>.callFactory = builder.retrofit.callFactory();  
+    <span class="hljs-keyword">this</span>.callAdapter = builder.callAdapter;   
+    <span class="hljs-keyword">this</span>.responseConverter = builder.responseConverter;   
+
+    <span class="hljs-keyword">this</span>.baseUrl = builder.retrofit.baseUrl();   
+    <span class="hljs-keyword">this</span>.relativeUrl = builder.relativeUrl;   
+    <span class="hljs-keyword">this</span>.httpMethod = builder.httpMethod;  
+    <span class="hljs-keyword">this</span>.headers = builder.headers;  
+    <span class="hljs-keyword">this</span>.contentType = builder.contentType; .  
+    <span class="hljs-keyword">this</span>.hasBody = builder.hasBody; y  
+    <span class="hljs-keyword">this</span>.isFormEncoded = builder.isFormEncoded;   
+    <span class="hljs-keyword">this</span>.isMultipart = builder.isMultipart;  
+    <span class="hljs-keyword">this</span>.parameterHandlers = builder.parameterHandlers;  
+}
+
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="步骤2servicemethod的builder">步骤2：<code>ServiceMethod的Builder（）</code></h2>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-67463ca7b61e4ca9.png" alt="Paste_Image.png" title=""></p>
+
+
+
+
+<pre class="prettyprint"><code class=" hljs cs">
+   <span class="hljs-keyword">public</span> <span class="hljs-title">Builder</span>(Retrofit retrofit, Method method) {
+      <span class="hljs-keyword">this</span>.retrofit = retrofit;
+      <span class="hljs-keyword">this</span>.method = method;
+
+      <span class="hljs-comment">// 获取网络请求接口方法里的注释</span>
+      <span class="hljs-keyword">this</span>.methodAnnotations = method.getAnnotations();
+      <span class="hljs-comment">// 获取网络请求接口方法里的参数类型       </span>
+      <span class="hljs-keyword">this</span>.parameterTypes = method.getGenericParameterTypes();  
+      <span class="hljs-comment">//获取网络请求接口方法里的注解内容    </span>
+      <span class="hljs-keyword">this</span>.parameterAnnotationsArray = method.getParameterAnnotations();    
+    }</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+<h2 id="步骤3servicemethod的build">步骤3：<code>ServiceMethod的build（）</code></h2>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-a3140ffde4e96495.png" alt="Paste_Image.png" title=""></p>
+
+
+
+
+<pre class="prettyprint"><code class=" hljs cs">
+<span class="hljs-comment">// 作用：控制ServiceMethod对象的生成流程</span>
+
+ <span class="hljs-keyword">public</span> ServiceMethod <span class="hljs-title">build</span>() {
+
+      callAdapter = createCallAdapter();    
+      <span class="hljs-comment">// 根据网络请求接口方法的返回值和注解类型，从Retrofit对象中获取对应的网络请求适配器  --&gt;关注点1</span>
+
+      responseType = callAdapter.responseType();    
+     <span class="hljs-comment">// 根据网络请求接口方法的返回值和注解类型，从Retrofit对象中获取该网络适配器返回的数据类型</span>
+
+      responseConverter = createResponseConverter();    
+      <span class="hljs-comment">// 根据网络请求接口方法的返回值和注解类型，从Retrofit对象中获取对应的数据转换器  --&gt;关注点3</span>
+      <span class="hljs-comment">// 构造 HTTP 请求时，我们传递的参数都是String</span>
+      <span class="hljs-comment">// Retrofit 类提供 converter把传递的参数都转化为 String </span>
+      <span class="hljs-comment">// 其余类型的参数都利用 Converter.Factory 的stringConverter 进行转换</span>
+      <span class="hljs-comment">// @Body 和 @Part 类型的参数利用Converter.Factory 提供的 requestBodyConverter 进行转换</span>
+      <span class="hljs-comment">// 这三种 converter 都是通过“询问”工厂列表进行提供，而工厂列表我们可以在构造 Retrofit 对象时进行添加。</span>
+
+
+       <span class="hljs-keyword">for</span> (Annotation annotation : methodAnnotations) {
+        parseMethodAnnotation(annotation);
+      }
+      <span class="hljs-comment">// 解析网络请求接口中方法的注解</span>
+      <span class="hljs-comment">// 主要是解析获取Http请求的方法</span>
+     <span class="hljs-comment">// 注解包括：DELETE、GET、POST、HEAD、PATCH、PUT、OPTIONS、HTTP、retrofit2.http.Headers、Multipart、FormUrlEncoded</span>
+     <span class="hljs-comment">// 处理主要是调用方法 parseHttpMethodAndPath(String httpMethod, String value, boolean hasBody) ServiceMethod中的httpMethod、hasBody、relativeUrl、relativeUrlParamNames域进行赋值</span>
+
+     <span class="hljs-keyword">int</span> parameterCount = parameterAnnotationsArray.length;
+     <span class="hljs-comment">// 获取当前方法的参数数量</span>
+
+      parameterHandlers = <span class="hljs-keyword">new</span> ParameterHandler&lt;?&gt;[parameterCount];
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> p = <span class="hljs-number">0</span>; p &lt; parameterCount; p++) {
+        Type parameterType = parameterTypes[p];
+        Annotation[] parameterAnnotations = parameterAnnotationsArray[p];
+        <span class="hljs-comment">// 为方法中的每个参数创建一个ParameterHandler&lt;?&gt;对象并解析每个参数使用的注解类型</span>
+        <span class="hljs-comment">// 该对象的创建过程就是对方法参数中注解进行解析</span>
+        <span class="hljs-comment">// 这里的注解包括：Body、PartMap、Part、FieldMap、Field、Header、QueryMap、Query、Path、Url </span>
+        parameterHandlers[p] = parseParameter(p, parameterType, parameterAnnotations);
+      } 
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ServiceMethod&lt;&gt;(<span class="hljs-keyword">this</span>);
+
+&lt;-- 总结 --&gt;
+<span class="hljs-comment">// 1. 根据返回值类型和方法标注从Retrofit对象的的网络请求适配器工厂集合和内容转换器工厂集合中分别获取到该方法对应的网络请求适配器和Response内容转换器；</span>
+<span class="hljs-comment">// 2. 根据方法的标注对ServiceMethod的域进行赋值</span>
+<span class="hljs-comment">// 3. 最后为每个方法的参数的标注进行解析，获得一个ParameterHandler&lt;?&gt;对象</span>
+<span class="hljs-comment">// 该对象保存有一个Request内容转换器——根据参数的类型从Retrofit的内容转换器工厂集合中获取一个Request内容转换器或者一个String内容转换器。</span>
+    }
+
+
+&lt;-- 关注点<span class="hljs-number">1</span>：createCallAdapter() --&gt;
+ <span class="hljs-keyword">private</span> CallAdapter&lt;?&gt; <span class="hljs-title">createCallAdapter</span>() {
+
+      <span class="hljs-comment">// 获取网络请求接口里方法的返回值类型</span>
+      Type returnType = method.getGenericReturnType();      
+
+      <span class="hljs-comment">// 获取网络请求接口接口里的注解</span>
+      <span class="hljs-comment">// 此处使用的是@Get</span>
+      Annotation[] annotations = method.getAnnotations();       
+      <span class="hljs-keyword">try</span> {
+
+      <span class="hljs-keyword">return</span> retrofit.callAdapter(returnType, annotations); 
+      <span class="hljs-comment">// 根据网络请求接口方法的返回值和注解类型，从Retrofit对象中获取对应的网络请求适配器</span>
+      <span class="hljs-comment">// 下面会详细说明retrofit.callAdapter（） -- &gt;关注点2</span>
+      }
+...
+
+
+&lt;-- 关注点<span class="hljs-number">2</span>：retrofit.callAdapter()  --&gt;
+ <span class="hljs-keyword">public</span> CallAdapter&lt;?&gt; <span class="hljs-title">callAdapter</span>(Type returnType, Annotation[] annotations) {
+    <span class="hljs-keyword">return</span> nextCallAdapter(<span class="hljs-keyword">null</span>, returnType, annotations);
+  }
+
+ <span class="hljs-keyword">public</span> CallAdapter&lt;?&gt; <span class="hljs-title">nextCallAdapter</span>(CallAdapter.Factory skipPast, Type returnType,
+      Annotation[] annotations) {
+
+    <span class="hljs-comment">// 创建 CallAdapter 如下</span>
+    <span class="hljs-comment">// 遍历 CallAdapter.Factory 集合寻找合适的工厂（该工厂集合在第一步构造 Retrofit 对象时进行添加（第一步时已经说明））</span>
+    <span class="hljs-comment">// 如果最终没有工厂提供需要的 CallAdapter，将抛出异常</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = start, count = adapterFactories.size(); i &lt; count; i++) {
+      CallAdapter&lt;?&gt; adapter = adapterFactories.<span class="hljs-keyword">get</span>(i).<span class="hljs-keyword">get</span>(returnType, annotations, <span class="hljs-keyword">this</span>);      
+      <span class="hljs-keyword">if</span> (adapter != <span class="hljs-keyword">null</span>) {
+        <span class="hljs-keyword">return</span> adapter;
+      }
+    }
+
+
+&lt;--   关注点<span class="hljs-number">3</span>：createResponseConverter（） --&gt;
+
+ <span class="hljs-keyword">private</span> Converter&lt;ResponseBody, T&gt; <span class="hljs-title">createResponseConverter</span>() {
+      Annotation[] annotations = method.getAnnotations();
+      <span class="hljs-keyword">try</span> {
+
+        <span class="hljs-comment">// responseConverter 还是由 Retrofit 类提供  --&gt;关注点4</span>
+        <span class="hljs-keyword">return</span> retrofit.responseBodyConverter(responseType, annotations);
+      } <span class="hljs-keyword">catch</span> (RuntimeException e) { 
+        <span class="hljs-keyword">throw</span> methodError(e, <span class="hljs-string">"Unable to create converter for %s"</span>, responseType);
+      }
+    }
+
+&lt;--   关注点<span class="hljs-number">4</span>：responseBodyConverter（） --&gt;
+  <span class="hljs-keyword">public</span> &lt;T&gt; Converter&lt;ResponseBody, T&gt; <span class="hljs-title">responseBodyConverter</span>(Type type, Annotation[] annotations) {
+    <span class="hljs-keyword">return</span> nextResponseBodyConverter(<span class="hljs-keyword">null</span>, type, annotations);
+  }
+
+ <span class="hljs-keyword">public</span> &lt;T&gt; Converter&lt;ResponseBody, T&gt; <span class="hljs-title">nextResponseBodyConverter</span>(Converter.Factory skipPast,
+
+    <span class="hljs-keyword">int</span> start = converterFactories.indexOf(skipPast) + <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = start, count = converterFactories.size(); i &lt; count; i++) {
+
+       <span class="hljs-comment">// 获取Converter 过程：（和获取 callAdapter 基本一致）</span>
+         Converter&lt;ResponseBody, ?&gt; converter =
+          converterFactories.<span class="hljs-keyword">get</span>(i).responseBodyConverter(type, annotations, <span class="hljs-keyword">this</span>); 
+       <span class="hljs-comment">// 遍历 Converter.Factory 集合并寻找合适的工厂（该工厂集合在构造 Retrofit 对象时进行添加（第一步时已经说明））</span>
+       <span class="hljs-comment">// 由于构造Retroifit采用的是Gson解析方式，所以取出的是GsonResponseBodyConverter</span>
+       <span class="hljs-comment">// Retrofit - Converters 还提供了 JSON，XML，ProtoBuf 等类型数据的转换功能。</span>
+       <span class="hljs-comment">// 继续看responseBodyConverter（） --&gt;关注点5    </span>
+    }
+
+
+&lt;--   关注点<span class="hljs-number">5</span>：responseBodyConverter（） --&gt;
+@Override
+<span class="hljs-keyword">public</span> Converter&lt;ResponseBody, ?&gt; <span class="hljs-title">responseBodyConverter</span>(Type type, 
+    Annotation[] annotations, Retrofit retrofit) {
+
+
+  TypeAdapter&lt;?&gt; adapter = gson.getAdapter(TypeToken.<span class="hljs-keyword">get</span>(type));
+  <span class="hljs-comment">// 根据目标类型，利用 Gson#getAdapter 获取相应的 adapter</span>
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> GsonResponseBodyConverter&lt;&gt;(gson, adapter);
+}
+
+<span class="hljs-comment">// 做数据转换时调用 Gson 的 API 即可。</span>
+final class GsonResponseBodyConverter&lt;T&gt; implements Converter&lt;ResponseBody, T&gt; {
+  <span class="hljs-keyword">private</span> final Gson gson;
+  <span class="hljs-keyword">private</span> final TypeAdapter&lt;T&gt; adapter;
+
+  GsonResponseBodyConverter(Gson gson, TypeAdapter&lt;T&gt; adapter) {
+    <span class="hljs-keyword">this</span>.gson = gson;
+    <span class="hljs-keyword">this</span>.adapter = adapter;
+  }
+
+  @Override 
+   <span class="hljs-keyword">public</span> T <span class="hljs-title">convert</span>(ResponseBody <span class="hljs-keyword">value</span>) throws IOException {
+    JsonReader jsonReader = gson.newJsonReader(<span class="hljs-keyword">value</span>.charStream());
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">return</span> adapter.read(jsonReader);
+    } <span class="hljs-keyword">finally</span> {
+      <span class="hljs-keyword">value</span>.close();
+    }
+  }
+}</code></pre>
+
+
+
+<ul>
+<li>当选择了RxjavaCallAdapterFactory后，Rxjava通过策略模式选择对应的adapter <br>
+
+
+<blockquote>
+  关于策略模式的讲解，请看文章<a href="http://www.jianshu.com/p/0c62bf587b9c">策略模式（Strategy Pattern）- 最易懂的设计模式解析</a></blockquote></li>
+  <li>具体过程是：根据网络接口方法的返回值类型来选择具体要用哪种CallAdapterFactory，然后创建具体的CallAdapter实例</li>
+  </ul>
+  
+
+
+<h3 id="采用工厂模式使得各功能模块高度解耦">采用工厂模式使得各功能模块高度解耦</h3>
+
+<ul>
+<li>上面提到了两种工厂：CallAdapter.Factory &amp; Converter.Factory分别负责提供不同的功能模块</li>
+<li>工厂负责如何提供、提供何种功能模块</li>
+<li>Retrofit 只负责提供选择何种工厂的决策信息（如网络接口方法的参数、返回值类型、注解等）</li>
+</ul>
+
+<p>这正是所谓的<strong>高内聚低耦合</strong>，工厂模式get。</p>
+
+<blockquote>
+  <p>关于工厂模式请看我写的文章： <br>
+  <a href="http://www.jianshu.com/p/e55fbddc071c">简单工厂模式（SimpleFactoryPattern）- 最易懂的设计模式解析</a> <br>
+  <a href="http://www.jianshu.com/p/d0c444275827">工厂方法模式（Factory Method）- 最易懂的设计模式解析</a> <br>
+  <a href="http://www.jianshu.com/p/7deb64f902db">抽象工厂模式（Abstract Factory）- 最易懂的设计模式解析</a></p>
+</blockquote>
+
+<p>终于配置完网络请求参数（即配置好<code>ServiceMethod</code>对象）。接下来将讲解第二行代码：<code>okHttpCall对象</code>的创建</p>
+
+
+
+<h3 id="第二行okhttpcall-okhttpcall-new-okhttpcallservicemethod-args">第二行：<code>OkHttpCall okHttpCall = new OkHttpCall&lt;&gt;(serviceMethod, args);</code></h3>
+
+<p>根据第一步配置好的<code>ServiceMethod</code>对象和输入的请求参数创建<code>okHttpCall</code>对象</p>
+
+
+
+<pre class="prettyprint"><code class=" hljs java">&lt;--OkHttpCall类 --&gt;
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">OkHttpCall</span> {</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ServiceMethod&lt;T&gt; serviceMethod; <span class="hljs-comment">// 含有所有网络请求参数信息的对象  </span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Object[] args; <span class="hljs-comment">// 网络请求接口的参数 </span>
+    <span class="hljs-keyword">private</span> okhttp3.Call rawCall; <span class="hljs-comment">//实际进行网络访问的类  </span>
+    <span class="hljs-keyword">private</span> Throwable creationFailure; <span class="hljs-comment">//几个状态标志位  </span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">boolean</span> executed;  
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">volatile</span> <span class="hljs-keyword">boolean</span> canceled;  
+
+&lt;--OkHttpCall构造函数 --&gt;
+  <span class="hljs-keyword">public</span> <span class="hljs-title">OkHttpCall</span>(ServiceMethod&lt;T&gt; serviceMethod, Object[] args) {  
+    <span class="hljs-comment">// 传入了配置好的ServiceMethod对象和输入的请求参数</span>
+    <span class="hljs-keyword">this</span>.serviceMethod = serviceMethod;  
+    <span class="hljs-keyword">this</span>.args = args;  
+}  
+</code></pre>
+
+
+
+<h3 id="第三行return-servicemethodcalladapteradaptokhttpcall">第三行：<code>return serviceMethod.callAdapter.adapt(okHttpCall);</code></h3>
+
+<p>将第二步创建的<code>OkHttpCall</code>对象传给第一步创建的<code>serviceMethod</code>对象中对应的网络请求适配器工厂的<code>adapt（）</code></p>
+
+<blockquote>
+  <p>返回对象类型：Android默认的是<code>Call&lt;&gt;</code>；若设置了RxJavaCallAdapterFactory，返回的则是<code>Observable&lt;&gt;</code></p>
+</blockquote>
+
+
+
+<pre class="prettyprint"><code class=" hljs cs">&lt;--  adapt（）详解--&gt;
+<span class="hljs-keyword">public</span> &lt;R&gt; Call&lt;R&gt; <span class="hljs-title">adapt</span>(Call&lt;R&gt; call) {
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ExecutorCallbackCall&lt;&gt;(callbackExecutor, call);  
+      }
+
+   ExecutorCallbackCall(Executor callbackExecutor, Call&lt;T&gt; <span class="hljs-keyword">delegate</span>) {
+      <span class="hljs-keyword">this</span>.<span class="hljs-keyword">delegate</span> = <span class="hljs-keyword">delegate</span>; 
+      <span class="hljs-comment">// 把上面创建并配置好参数的OkhttpCall对象交给静态代理delegate</span>
+      <span class="hljs-comment">// 静态代理和动态代理都属于代理模式</span>
+     <span class="hljs-comment">// 静态代理作用：代理执行被代理者的方法，且可在要执行的方法前后加入自己的动作，进行对系统功能的拓展</span>
+
+      <span class="hljs-keyword">this</span>.callbackExecutor = callbackExecutor;
+      <span class="hljs-comment">// 传入上面定义的回调方法执行器</span>
+      <span class="hljs-comment">// 用于进行线程切换   </span>
+    }</code></pre>
+
+<ul>
+<li>采用了<strong>装饰模式</strong>：ExecutorCallbackCall = 装饰者，而里面真正去执行网络请求的还是OkHttpCall</li>
+<li>使用装饰模式的原因：希望在OkHttpCall发送请求时做一些额外操作。这里的额外操作是线程转换，即将子线程切换到主线程 <br>
+
+
+<blockquote>
+  <ol>
+  <li>OkHttpCall的enqueue()是进行网络异步请求的：当你调用OkHttpCall.enqueue（）时，回调的callback是在子线程中，需要通过Handler转换到主线程进行回调。ExecutorCallbackCall就是用于线程回调； <br></li>
+  <li>当然以上是原生Retrofit使用的切换线程方式。如果你用Rxjava，那就不会用到这个ExecutorCallbackCall而是RxJava的Call，此处不过多展开</li>
+  </ol></blockquote></li></ul> <br>
+  
+  
+
+
+<h3 id="步骤4讲解calljavabean-call-netservicegetcall">步骤4讲解：<code>Call&lt;JavaBean&gt; call = NetService.getCall();</code></h3>
+
+<ul>
+<li><code>NetService</code>对象实际上是动态代理对象<code>Proxy.newProxyInstance（）</code>（步骤3中已说明），并不是真正的网络请求接口创建的对象</li>
+<li>当<code>NetService</code>对象调用<code>getCall（）</code>时会被动态代理对象<code>Proxy.newProxyInstance（）</code>拦截，然后调用自身的<code>InvocationHandler # invoke（）</code></li>
+<li><code>invoke(Object proxy, Method method, Object... args)</code>会传入3个参数：<code>Object proxy:</code>（代理对象）、 <br>
+<code>Method method</code>（调用的<code>getCall()</code>） <br>
+<code>Object... args</code>（方法的参数，即<code>getCall（*）</code>中的*）</li>
+<li>接下来利用Java反射获取到<code>getCall（）</code>的注解信息，配合args参数创建<code>ServiceMethod对象</code>。 <br>
+
+
+<blockquote>
+  <p>如上面步骤3描述，此处不再次讲解</p></blockquote></li>
+  </ul> <br>
+  <strong>最终创建并返回一个<code>OkHttpCall</code>类型的Call对象</strong> <br>
+  1. <code>OkHttpCall</code>类是<code>OkHttp</code>的包装类 <br>
+  2. 创建了<code>OkHttpCall</code>类型的Call对象还不能发送网络请求，需要创建<code>Request</code>对象才能发送网络请求
+
+
+
+
+<h1 id="总结-1">总结</h1>
+
+<p>Retrofit采用了 外观模式 统一调用创建网络请求接口实例和网络请求参数配置的方法，具体细节是：</p>
+
+<ul>
+<li>动态创建网络请求接口的实例<strong>（代理模式 - 动态代理）</strong></li>
+<li>创建 <code>serviceMethod</code> 对象<strong>（建造者模式 &amp; 单例模式（缓存机制））</strong></li>
+<li>对 <code>serviceMethod</code> 对象进行网络请求参数配置：通过解析网络请求接口方法的参数、返回值和注解类型，从Retrofit对象中获取对应的网络请求的url地址、网络请求执行器、网络请求适配器 &amp; 数据转换器。<strong>（策略模式）</strong></li>
+<li>对 <code>serviceMethod</code> 对象加入线程切换的操作，便于接收数据后通过Handler从子线程切换到主线程从而对返回数据结果进行处理<strong>（装饰模式）</strong></li>
+<li>最终创建并返回一个<code>OkHttpCall</code>类型的网络请求对象</li>
+</ul>
+
+<hr>
+
+
+
+<h1 id="3-执行网络请求">3. 执行网络请求</h1>
+
+<ul>
+<li><code>Retrofit</code>默认使用<code>OkHttp</code>，即<code>OkHttpCall类</code>（实现了 <code>retrofit2.Call&lt;T&gt;</code>接口） <br>
+
+
+<blockquote>
+  <p>但可以自定义选择自己需要的Call类</p></blockquote></li>
+  <li><code>OkHttpCall</code>提供了两种网络请求方式： <br>
+  <ol><li>同步请求：<code>OkHttpCall.execute()</code></li>
+  <li>异步请求：<code>OkHttpCall.enqueue()</code></li></ol></li>
+  </ul> <br>
+  下面将详细介绍这两种网络请求方式。 <br>
+  对于OkHttpCall的enqueue（）、execute（）此处不往下分析，有兴趣的读者可以看OkHttp的源码
+
+
+
+
+
+
+<h3 id="31-同步请求okhttpcallexecute">3.1 同步请求<code>OkHttpCall.execute()</code></h3>
+
+
+
+
+
+<h4 id="311-发送请求过程">3.1.1 发送请求过程</h4>
+
+<ul>
+<li><strong>步骤1：</strong>对网络请求接口的方法中的每个参数利用对应<code>ParameterHandler</code>进行解析，再根据<code>ServiceMethod</code>对象创建一个<code>OkHttp</code>的<code>Request</code>对象</li>
+<li><strong>步骤2：</strong>使用<code>OkHttp</code>的<code>Request</code>发送网络请求；</li>
+<li><strong>步骤3：</strong>对返回的数据使用之前设置的数据转换器（GsonConverterFactory）解析返回的数据，最终得到一个<code>Response&lt;T&gt;</code>对象</li>
+</ul>
+
+
+
+<h4 id="312-具体使用">3.1.2 具体使用</h4>
+
+
+
+<pre class="prettyprint"><code class=" hljs vbscript"><span class="hljs-built_in">Response</span>&lt;JavaBean&gt; <span class="hljs-built_in">response</span> = <span class="hljs-keyword">call</span>.<span class="hljs-keyword">execute</span>();  </code></pre>
+
+<p>上面简单的一行代码，其实包含了整个发送网络同步请求的三个步骤。</p>
+
+
+
+<h4 id="313-源码分析">3.1.3 源码分析</h4>
+
+
+
+<pre class="prettyprint"><code class=" hljs java"><span class="hljs-annotation">@Override</span> 
+<span class="hljs-keyword">public</span> Response&lt;T&gt; <span class="hljs-title">execute</span>() <span class="hljs-keyword">throws</span> IOException {
+  okhttp3.Call call;
+
+ <span class="hljs-comment">// 设置同步锁</span>
+  <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">this</span>) {
+    call = rawCall;
+    <span class="hljs-keyword">if</span> (call == <span class="hljs-keyword">null</span>) {
+      <span class="hljs-keyword">try</span> {
+        call = rawCall = createRawCall();
+        <span class="hljs-comment">// 步骤1：创建一个OkHttp的Request对象请求 --&gt;关注1</span>
+      } <span class="hljs-keyword">catch</span> (IOException | RuntimeException e) {
+        creationFailure = e;
+        <span class="hljs-keyword">throw</span> e;
+      }
+    }
+  }
+
+  <span class="hljs-keyword">return</span> parseResponse(call.execute());
+  <span class="hljs-comment">// 步骤2：调用OkHttpCall的execute()发送网络请求（同步）</span>
+  <span class="hljs-comment">// 步骤3：解析网络请求返回的数据parseResponse（） --&gt;关注2</span>
+}
+
+&lt;-- 关注<span class="hljs-number">1</span>：createRawCall()  --&gt;
+<span class="hljs-keyword">private</span> okhttp3.Call <span class="hljs-title">createRawCall</span>() <span class="hljs-keyword">throws</span> IOException {
+
+  Request request = serviceMethod.toRequest(args);
+  <span class="hljs-comment">// 从ServiceMethod的toRequest（）返回一个Request对象</span>
+  okhttp3.Call call = serviceMethod.callFactory.newCall(request);
+  <span class="hljs-comment">// 根据serviceMethod和request对象创建 一个okhttp3.Request</span>
+
+  <span class="hljs-keyword">if</span> (call == <span class="hljs-keyword">null</span>) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> NullPointerException(<span class="hljs-string">"Call.Factory returned null."</span>);
+  }
+  <span class="hljs-keyword">return</span> call;
+}
+
+&lt;--  关注<span class="hljs-number">2</span>：parseResponse（）--&gt;
+Response&lt;T&gt; parseResponse(okhttp3.Response rawResponse) <span class="hljs-keyword">throws</span> IOException {
+  ResponseBody rawBody = rawResponse.body();
+
+  rawResponse = rawResponse.newBuilder()
+      .body(<span class="hljs-keyword">new</span> NoContentResponseBody(rawBody.contentType(), rawBody.contentLength()))
+      .build();
+  <span class="hljs-comment">// 收到返回数据后进行状态码检查</span>
+  <span class="hljs-comment">// 具体关于状态码说明下面会详细介绍</span>
+  <span class="hljs-keyword">int</span> code = rawResponse.code();
+  <span class="hljs-keyword">if</span> (code &lt; <span class="hljs-number">200</span> || code &gt;= <span class="hljs-number">300</span>) {
+  }
+
+  <span class="hljs-keyword">if</span> (code == <span class="hljs-number">204</span> || code == <span class="hljs-number">205</span>) {
+    <span class="hljs-keyword">return</span> Response.success(<span class="hljs-keyword">null</span>, rawResponse);
+  }
+
+  ExceptionCatchingRequestBody catchingBody = <span class="hljs-keyword">new</span> ExceptionCatchingRequestBody(rawBody);
+  <span class="hljs-keyword">try</span> {
+    T body = serviceMethod.toResponse(catchingBody);
+   <span class="hljs-comment">// 等Http请求返回后 &amp; 通过状态码检查后，将response body传入ServiceMethod中，ServiceMethod通过调用Converter接口（之前设置的GsonConverterFactory）将response body转成一个Java对象，即解析返回的数据</span>
+
+
+<span class="hljs-comment">// 生成Response类</span>
+    <span class="hljs-keyword">return</span> Response.success(body, rawResponse);
+  } <span class="hljs-keyword">catch</span> (RuntimeException e) {
+    ... <span class="hljs-comment">// 异常处理</span>
+  }
+}</code></pre>
+
+<p>特别注意：</p>
+
+<ul>
+<li><code>ServiceMethod</code>几乎保存了一个网络请求所需要的数据</li>
+<li>发送网络请求时，<code>OkHttpCall</code>需要从<code>ServiceMethod</code>中获得一个Request对象</li>
+<li><p>解析数据时，还需要通过<code>ServiceMethod</code>使用<code>Converter</code>（数据转换器）转换成Java对象进行数据解析</p>
+
+<blockquote>
+  <p>为了提高效率，Retrofit还会对解析过的请求<code>ServiceMethod</code>进行缓存，存放在<code>Map&lt;Method, ServiceMethod&gt; serviceMethodCache = new LinkedHashMap&lt;&gt;();</code>对象中，即第二步提到的单例模式</p>
+</blockquote></li>
+<li><p>关于状态码检查时的状态码说明：</p></li>
+</ul>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-98f84c6cf564936d.png" alt="Paste_Image.png" title=""></p>
+
+<p>以上便是整个以<strong>同步的方式</strong>发送网络请求的过程。</p>
+
+<h3 id="32-异步请求okhttpcallenqueue">3.2 异步请求<code>OkHttpCall.enqueue()</code></h3>
+
+
+
+<h5 id="321-发送请求过程">3.2.1 发送请求过程</h5>
+
+<ul>
+<li><strong>步骤1：</strong>对网络请求接口的方法中的每个参数利用对应<code>ParameterHandler</code>进行解析，再根据<code>ServiceMethod</code>对象创建一个<code>OkHttp</code>的<code>Request</code>对象</li>
+<li><strong>步骤2：</strong>使用<code>OkHttp</code>的<code>Request</code>发送网络请求；</li>
+<li><strong>步骤3：</strong>对返回的数据使用之前设置的数据转换器（GsonConverterFactory）解析返回的数据，最终得到一个<code>Response&lt;T&gt;</code>对象</li>
+<li><strong>步骤4：</strong>进行线程切换从而在主线程处理返回的数据结果 <br>
+
+
+<blockquote>
+  <p>若使用了RxJava，则直接回调到主线程</p></blockquote></li>
+  </ul> <br>
+  异步请求的过程跟同步请求类似，<strong>唯一不同之处在于：异步请求会将回调方法交给回调执行器在指定的线程中执行。</strong> <br>
+  指定的线程此处是指主线程（UI线程）
+
+
+
+
+
+
+<h5 id="322-具体使用">3.2.2 具体使用</h5>
+
+
+
+
+
+
+<pre class="prettyprint"><code class=" hljs avrasm"><span class="hljs-keyword">call</span><span class="hljs-preprocessor">.enqueue</span>(new Callback&lt;JavaBean&gt;() {
+            @Override
+            public void onResponse(<span class="hljs-keyword">Call</span>&lt;JavaBean&gt; <span class="hljs-keyword">call</span>, Response&lt;JavaBean&gt; response) {
+                System<span class="hljs-preprocessor">.out</span><span class="hljs-preprocessor">.println</span>(response<span class="hljs-preprocessor">.isSuccessful</span>())<span class="hljs-comment">;</span>
+                if (response<span class="hljs-preprocessor">.isSuccessful</span>()) {
+                    response<span class="hljs-preprocessor">.body</span>()<span class="hljs-preprocessor">.show</span>()<span class="hljs-comment">;</span>
+                }
+                else {
+                    try {
+                        System<span class="hljs-preprocessor">.out</span><span class="hljs-preprocessor">.println</span>(response<span class="hljs-preprocessor">.errorBody</span>()<span class="hljs-preprocessor">.string</span>())<span class="hljs-comment">;</span>
+                    } catch (IOException e) {
+                        e<span class="hljs-preprocessor">.printStackTrace</span>()<span class="hljs-comment">;</span>
+                    } <span class="hljs-comment">;</span>
+                }
+            }</code></pre>
+
+
+
+<ul>
+<li>从上面分析有：<code>call</code>是一个静态代理</li>
+<li>使用静态代理的作用是：在okhttpCall发送网络请求的前后进行额外操作 <br>
+
+
+<blockquote>
+  这里的额外操作是：线程切换，即将子线程切换到主线程，从而在主线程对返回的数据结果进行处理</blockquote></li>
+  </ul>
+  
+
+
+<h5 id="323-源码分析">3.2.3 源码分析</h5>
+
+
+
+<pre class="prettyprint"><code class=" hljs java">&lt;--  call.enqueue（）解析  --&gt;
+<span class="hljs-annotation">@Override</span> 
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">enqueue</span>(<span class="hljs-keyword">final</span> Callback&lt;T&gt; callback) {
+
+      delegate.enqueue(<span class="hljs-keyword">new</span> Callback&lt;T&gt;() {
+     <span class="hljs-comment">// 使用静态代理 delegate进行异步请求 -&gt;&gt;分析1</span>
+     <span class="hljs-comment">// 等下记得回来</span>
+        <span class="hljs-annotation">@Override</span> 
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onResponse</span>(Call&lt;T&gt; call, <span class="hljs-keyword">final</span> Response&lt;T&gt; response) {
+          <span class="hljs-comment">// 步骤4：线程切换，从而在主线程显示结果</span>
+          callbackExecutor.execute(<span class="hljs-keyword">new</span> Runnable() {
+          <span class="hljs-comment">// 最后Okhttp的异步请求结果返回到callbackExecutor</span>
+          <span class="hljs-comment">// callbackExecutor.execute（）通过Handler异步回调将结果传回到主线程进行处理（如显示在Activity等等），即进行了线程切换</span>
+          <span class="hljs-comment">// 具体是如何做线程切换 -&gt;&gt;分析2</span>
+              <span class="hljs-annotation">@Override</span> 
+               <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span>() {
+              <span class="hljs-keyword">if</span> (delegate.isCanceled()) {
+                callback.onFailure(ExecutorCallbackCall.<span class="hljs-keyword">this</span>, <span class="hljs-keyword">new</span> IOException(<span class="hljs-string">"Canceled"</span>));
+              } <span class="hljs-keyword">else</span> {
+                callback.onResponse(ExecutorCallbackCall.<span class="hljs-keyword">this</span>, response);
+              }
+            }
+          });
+        }
+
+        <span class="hljs-annotation">@Override</span> 
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onFailure</span>(Call&lt;T&gt; call, <span class="hljs-keyword">final</span> Throwable t) {
+          callbackExecutor.execute(<span class="hljs-keyword">new</span> Runnable() {
+            <span class="hljs-annotation">@Override</span> <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">run</span>() {
+              callback.onFailure(ExecutorCallbackCall.<span class="hljs-keyword">this</span>, t);
+            }
+          });
+        }
+      });
+    }
+
+
+&lt;-- 分析<span class="hljs-number">1</span>：delegate.enqueue（）解析 --&gt;
+<span class="hljs-annotation">@Override</span> 
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">enqueue</span>(<span class="hljs-keyword">final</span> Callback&lt;T&gt; callback) {
+
+    okhttp3.Call call;
+    Throwable failure;
+
+<span class="hljs-comment">// 步骤1：创建OkHttp的Request对象，再封装成OkHttp.call</span>
+     <span class="hljs-comment">// delegate代理在网络请求前的动作：创建OkHttp的Request对象，再封装成OkHttp.call</span>
+    <span class="hljs-keyword">synchronized</span> (<span class="hljs-keyword">this</span>) {
+      <span class="hljs-keyword">if</span> (executed) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> IllegalStateException(<span class="hljs-string">"Already executed."</span>);
+      executed = <span class="hljs-keyword">true</span>;
+
+      call = rawCall;
+      failure = creationFailure;
+      <span class="hljs-keyword">if</span> (call == <span class="hljs-keyword">null</span> &amp;&amp; failure == <span class="hljs-keyword">null</span>) {
+        <span class="hljs-keyword">try</span> {
+
+          call = rawCall = createRawCall(); 
+          <span class="hljs-comment">// 创建OkHttp的Request对象，再封装成OkHttp.call</span>
+         <span class="hljs-comment">// 方法同发送同步请求，此处不作过多描述  </span>
+        } <span class="hljs-keyword">catch</span> (Throwable t) {
+          failure = creationFailure = t;
+        }
+      }
+
+<span class="hljs-comment">// 步骤2：发送网络请求</span>
+    <span class="hljs-comment">// delegate是OkHttpcall的静态代理</span>
+    <span class="hljs-comment">// delegate静态代理最终还是调用Okhttp.enqueue进行网络请求</span>
+    call.enqueue(<span class="hljs-keyword">new</span> okhttp3.Callback() {
+      <span class="hljs-annotation">@Override</span> 
+        <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onResponse</span>(okhttp3.Call call, okhttp3.Response rawResponse)
+          <span class="hljs-keyword">throws</span> IOException {
+        Response&lt;T&gt; response;
+        <span class="hljs-keyword">try</span> {
+
+          <span class="hljs-comment">// 步骤3：解析返回数据</span>
+          response = parseResponse(rawResponse);
+        } <span class="hljs-keyword">catch</span> (Throwable e) {
+          callFailure(e);
+          <span class="hljs-keyword">return</span>;
+        }
+        callSuccess(response);
+      }
+
+      <span class="hljs-annotation">@Override</span> 
+         <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">onFailure</span>(okhttp3.Call call, IOException e) {
+        <span class="hljs-keyword">try</span> {
+          callback.onFailure(OkHttpCall.<span class="hljs-keyword">this</span>, e);
+        } <span class="hljs-keyword">catch</span> (Throwable t) {
+          t.printStackTrace();
+        }
+      }
+
+      <span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">callFailure</span>(Throwable e) {
+        <span class="hljs-keyword">try</span> {
+          callback.onFailure(OkHttpCall.<span class="hljs-keyword">this</span>, e);
+        } <span class="hljs-keyword">catch</span> (Throwable t) {
+          t.printStackTrace();
+        }
+      }
+
+      <span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">callSuccess</span>(Response&lt;T&gt; response) {
+        <span class="hljs-keyword">try</span> {
+          callback.onResponse(OkHttpCall.<span class="hljs-keyword">this</span>, response);
+        } <span class="hljs-keyword">catch</span> (Throwable t) {
+          t.printStackTrace();
+        }
+      }
+    });
+  }
+
+<span class="hljs-comment">// 请回去上面分析1的起点</span>
+
+&lt;-- 分析<span class="hljs-number">2</span>：异步请求后的线程切换--&gt;
+<span class="hljs-comment">// 线程切换是通过一开始创建Retrofit对象时Platform在检测到运行环境是Android时进行创建的：（之前已分析过）</span>
+<span class="hljs-comment">// 采用适配器模式</span>
+<span class="hljs-keyword">static</span> class Android extends Platform {
+
+    <span class="hljs-comment">// 创建默认的回调执行器工厂</span>
+    <span class="hljs-comment">// 如果不将RxJava和Retrofit一起使用，一般都是使用该默认的CallAdapter.Factory</span>
+    <span class="hljs-comment">// 后面会对RxJava和Retrofit一起使用的情况进行分析</span>
+    <span class="hljs-annotation">@Override</span>
+      CallAdapter.Factory defaultCallAdapterFactory(Executor callbackExecutor) {
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> ExecutorCallAdapterFactory(callbackExecutor);
+    }
+
+    <span class="hljs-annotation">@Override</span> 
+      <span class="hljs-keyword">public</span> Executor <span class="hljs-title">defaultCallbackExecutor</span>() {
+      <span class="hljs-comment">// 返回一个默认的回调方法执行器</span>
+      <span class="hljs-comment">// 该执行器负责在主线程（UI线程）中执行回调方法</span>
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> MainThreadExecutor();
+    }
+
+    <span class="hljs-comment">// 获取主线程Handler</span>
+    <span class="hljs-keyword">static</span> class MainThreadExecutor implements Executor {
+      <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Handler handler = <span class="hljs-keyword">new</span> Handler(Looper.getMainLooper());
+
+
+      <span class="hljs-annotation">@Override</span> 
+      <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">execute</span>(Runnable r) {
+        <span class="hljs-comment">// Retrofit获取了主线程的handler</span>
+        <span class="hljs-comment">// 然后在UI线程执行网络请求回调后的数据显示等操作。</span>
+        handler.post(r);
+      }
+    }
+
+<span class="hljs-comment">// 切换线程的流程：</span>
+<span class="hljs-comment">// 1. 回调ExecutorCallAdapterFactory生成了一个ExecutorCallbackCall对象</span>
+<span class="hljs-comment">// 2. 通过调用ExecutorCallbackCall.enqueue(CallBack)从而调用MainThreadExecutor的execute()通过handler切换到主线程处理返回结果（如显示在Activity等等）</span>
+  }
+</code></pre>
+
+<p>以上便是整个以 <strong>异步方式</strong>发送网络请求的过程。</p>
+
+<hr>
+
+<h1 id="5-总结">5. 总结</h1>
+
+<p><code>Retrofit</code> 本质上是一个 <code>RESTful</code> 的<code>HTTP</code> 网络请求框架的封装，即通过 大量的设计模式 封装了 <code>OkHttp</code> ，使得简洁易用。具体过程如下：</p>
+
+<ol>
+<li><code>Retrofit</code> 将 <code>Http</code>请求 抽象 成 <code>Java</code>接口</li>
+<li>在接口里用 注解 描述和配置 网络请求参数</li>
+<li>用动态代理 的方式，动态将网络请求接口的注解 解析 成<code>HTTP</code>请求</li>
+<li>最后执行<code>HTTP</code>请求</li>
+</ol>
+
+<p>最后贴一张非常详细的<code>Retrofit</code>源码分析图：</p>
+
+<p><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/944365-56df9f9ed647f7da.png" alt="Retrofit源码分析图" title=""></p>
+
+<h1 id="6-最后">6. 最后</h1>
+
+<ul>
+<li>看完本文，相信你已经非常熟悉 <code>Retrofit 2.0</code> 的源码分析</li>
+<li>关于<code>Retrofit 2.0</code>的详细使用教程，请看文章<a href="http://blog.csdn.net/carson_ho/article/details/73732076">这是一份很详细的 Retrofit 2.0 使用教程（含实例讲解）</a></li>
+<li>接下来，我将继续分析与 Retrofit 配合使用的 <strong>RxJava</strong>，有兴趣可以继续关注<a href="http://blog.csdn.net/carson_ho">Carson_Ho的安卓开发笔记</a></li>
+</ul>
+
+<hr>
+
+<h1 id="请帮顶或评论点赞因为你的鼓励是我写作的最大动力">请帮顶或评论点赞！因为你的鼓励是我写作的最大动力！</h1>                </div>
+                                                <link rel="stylesheet" href="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/markdown_views-68a8aad09e.css">
+                                    </div>
+    </article>
+      <div class="readall_box csdn-tracking-statistics tracking-click" data-mod="popu_376">
+          <div class="read_more_mask"></div>
+          <a class="btn btn-large btn-gray-fred read_more_btn" target="_self">阅读全文</a>
+      </div>
+      <div class="article_copyright">
+         
+              </div>
+      <ul class="article_collect clearfix csdn-tracking-statistics tracking-click" data-mod="popu_378">
+          <li class="tit">本文已收录于以下专栏：</li>
+<!--          [startarticlecolumns]-->
+                                <!--          [endarticlecolumns]-->
+      </ul>
+      <div class="comment_box clearfix" id="comments">
+          <div id="comment_form">
+              <div id="commentsbmitarear">
+                              </div>
+          </div>
+      </div>
+      <div class="comment_li_outbox">
+          <div id="comment_list"></div>
+      </div>
+
+      <div class="more_comment">
+          <div id="comment_bar" class="trackgin-ad" data-mod="popu_385"></div>
+      </div>
+
+      <!-- <h3 class="recommend_tit" id="related">相关文章推荐</h3> -->
+      <div class="recommend_list clearfix" id="rasss">
+                                          <dl class="clearfix csdn-tracking-statistics recommend_article" data-mod="popu_387" data-poputype="feed" data-feed-show="false" data-dsm="post">
+                <a href="http://blog.csdn.net/chenkai19920410/article/details/51719425" target="_blank" strategy="BlogCommendFromBaidu_0">
+                    <dd>
+                        <h2>Retrofit2源码解析</h2>
+                        <div class="summary">
+                            最近项目将网络框架换成Retrofit2.0.2，文中说的Retrofit都是指的Retrofit2这里要说明一下，毕竟和Retrofit1差别还是蛮大的，结合Okhttp，RxJava还是比较好用的...                        </div>
+
+                        <ul>
+                            <li class="avatar_img"><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/3_chenkai19920410.jpg" alt="chenkai19920410" title="chenkai19920410"></li>
+                            <li class="user_name">chenkai19920410</li>
+                            <li class="time">2016年06月20日 17:27</li>
+                            <li class="visited_num"><i class="icon iconfont icon-read"></i><span>4297</span></li>
+                        </ul>
+                    </dd>
+                </a>
+            </dl>
+                                                    <dl class="clearfix csdn-tracking-statistics recommend_article" data-mod="popu_387" data-poputype="feed" data-feed-show="false" data-dsm="post">
+                <a href="http://blog.csdn.net/u011692041/article/details/76339018" target="_blank" strategy="BlogCommendFromBaidu_1">
+                    <dd>
+                        <h2>Retrofit 源码分析流程</h2>
+                        <div class="summary">
+                            前言
+  Retrofit 框架使用了有一年多了,但是说来惭愧,一直都是处于使用的状态,不会用的地方利用百度或者谷歌搜索一下.一直没有去摸索里面的源代码.这几天我对源代码进行阅读之后,不仅理顺了Ret...                        </div>
+
+                        <ul>
+                            <li class="avatar_img"><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/3_u011692041.jpg" alt="u011692041" title="u011692041"></li>
+                            <li class="user_name">u011692041</li>
+                            <li class="time">2017年07月30日 18:03</li>
+                            <li class="visited_num"><i class="icon iconfont icon-read"></i><span>382</span></li>
+                        </ul>
+                    </dd>
+                </a>
+            </dl>
+                                          <dl class="">
+            <script>
+            (function() {
+              var s = "_" + Math.random().toString(36).slice(2);
+              document.write('<div id="' + s + '"></div>');
+              (window.slotbydup=window.slotbydup || []).push({
+                id: '4765209',
+                container: s,
+                size: '808,120',
+                display: 'inlay-fix'
+              });
+            })();
+            </script><div id="_be5ro3x6jd"></div><script charset="utf-8" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/fcwm"></script><iframe scrolling="no" style="width: 100%; height: 88px; border: 0px;" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/saved_resource.html"></iframe>
+          </dl>
+                                        <dl class="clearfix csdn-tracking-statistics recommend_article" data-mod="popu_387" data-poputype="feed" data-feed-show="false" data-dsm="post">
+                <a href="http://blog.csdn.net/LosingCarryJie/article/details/75863522" target="_blank" strategy="BlogCommendFromBaidu_2">
+                    <dd>
+                        <h2>Retrofit源码解析(一)</h2>
+                        <div class="summary">
+                            Retrofit如火如荼火遍大江南北，基本上每个Android开发者都听过或者用过，接下来我将通过项目中Retrofit代码实例和底层源码来分析Retrofit运行机制，温馨提示：阅读完此篇文章你将花...                        </div>
+
+                        <ul>
+                            <li class="avatar_img"><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/3_losingcarryjie.jpg" alt="LosingCarryJie" title="LosingCarryJie"></li>
+                            <li class="user_name">LosingCarryJie</li>
+                            <li class="time">2017年07月23日 11:30</li>
+                            <li class="visited_num"><i class="icon iconfont icon-read"></i><span>272</span></li>
+                        </ul>
+                    </dd>
+                </a>
+            </dl>
+                                                    <dl class="clearfix csdn-tracking-statistics recommend_article" data-mod="popu_387" data-poputype="feed" data-feed-show="false" data-dsm="post">
+                <a href="http://blog.csdn.net/JohanMan/article/details/79257504" target="_blank" strategy="BlogCommendFromBaidu_3">
+                    <dd>
+                        <h2>Android Retrofit源码解析</h2>
+                        <div class="summary">
+                            按照分析源码流程的“套路”，我们先来个例子：
+
+Api
+
+
+
+public interface SearchApi {
+    @GET("/search")
+    Call&gt; search(@Qu...                        </div>
+
+                        <ul>
+                            <li class="avatar_img"><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/3_johanman.jpg" alt="JohanMan" title="JohanMan"></li>
+                            <li class="user_name">JohanMan</li>
+                            <li class="time">2018年02月05日 10:35</li>
+                            <li class="visited_num"><i class="icon iconfont icon-read"></i><span>49</span></li>
+                        </ul>
+                    </dd>
+                </a>
+            </dl>
+                                                    <dl class="clearfix csdn-tracking-statistics recommend_article" data-mod="popu_387" data-poputype="feed" data-feed-show="false" data-dsm="post">
+                <a href="http://blog.csdn.net/p892848153/article/details/50890500" target="_blank" strategy="BlogCommendFromBaidu_4">
+                    <dd>
+                        <h2>Retrofit2.0源码分析</h2>
+                        <div class="summary">
+                            最近注解式的框架非常火，注解以其轻量，简洁等特性被人们所喜爱者，关键是它解藕。网络请求的框架非常多，比较受欢迎的当属retrofit和okHttp了。连retrofit都是基于okHttp之上开发的。...                        </div>
+
+                        <ul>
+                            <li class="avatar_img"><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/3_p892848153.jpg" alt="p892848153" title="p892848153"></li>
+                            <li class="user_name">p892848153</li>
+                            <li class="time">2016年03月14日 23:20</li>
+                            <li class="visited_num"><i class="icon iconfont icon-read"></i><span>3741</span></li>
+                        </ul>
+                    </dd>
+                </a>
+            </dl>
+                                                    <dl class="clearfix csdn-tracking-statistics recommend_article" data-mod="popu_387" data-poputype="feed" data-feed-show="false" data-dsm="post">
+                <a href="http://blog.csdn.net/a992036795/article/details/52116436" target="_blank" strategy="BlogCommendFromBaidu_5">
+                    <dd>
+                        <h2>Retrofit源码简要分析</h2>
+                        <div class="summary">
+                            一、Retrofit的使用 
+本文使用的Retrofit 2.1.0版本。 
+在gradle中加入：    compile 'com.squareup.retrofit2:retrofit:2.1.0...                        </div>
+
+                        <ul>
+                            <li class="avatar_img"><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/3_a992036795.jpg" alt="a992036795" title="a992036795"></li>
+                            <li class="user_name">a992036795</li>
+                            <li class="time">2016年08月04日 11:39</li>
+                            <li class="visited_num"><i class="icon iconfont icon-read"></i><span>952</span></li>
+                        </ul>
+                    </dd>
+                </a>
+            </dl>
+                                                    <dl class="clearfix csdn-tracking-statistics recommend_article" data-mod="popu_387" data-poputype="feed" data-feed-show="false" data-dsm="post">
+                <a href="http://blog.csdn.net/liner666/article/details/54890205" target="_blank" strategy="BlogCommendFromBaidu_6">
+                    <dd>
+                        <h2>Android 网络框架之Retrofit2使用详解及从源码中解析原理</h2>
+                        <div class="summary">
+                            版权声明：本文为博主原创文章，未经博主允许不得转载。
+
+
+
+
+目录(?)[+]
+
+
+
+
+
+就目前来说Retrofit2使用的已相当的广泛，那么我们先来了解下两个问题：
+
+1 ...                        </div>
+
+                        <ul>
+                            <li class="avatar_img"><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/3_liner666.jpg" alt="liner666" title="liner666"></li>
+                            <li class="user_name">liner666</li>
+                            <li class="time">2017年02月06日 10:18</li>
+                            <li class="visited_num"><i class="icon iconfont icon-read"></i><span>438</span></li>
+                        </ul>
+                    </dd>
+                </a>
+            </dl>
+                                                    <dl class="clearfix csdn-tracking-statistics recommend_article" data-mod="popu_387" data-poputype="feed" data-feed-show="false" data-dsm="post">
+                <a href="http://blog.csdn.net/huyongl1989/article/details/52829822" target="_blank" strategy="BlogCommendFromBaidu_7">
+                    <dd>
+                        <h2>透过Retrofit使用看其源码设计模式</h2>
+                        <div class="summary">
+                            前言这篇文章我将从Retrofit的基本用法出发，透过其使用步骤，一步步的探究Retrofit的实现原理及其源码的设计模式。这篇文章可能会将Retrofit中用到的设计模式和其实现原理穿插着写，所以各...                        </div>
+
+                        <ul>
+                            <li class="avatar_img"><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/3_huyongl1989.jpg" alt="huyongl1989" title="huyongl1989"></li>
+                            <li class="user_name">huyongl1989</li>
+                            <li class="time">2016年10月16日 12:29</li>
+                            <li class="visited_num"><i class="icon iconfont icon-read"></i><span>3462</span></li>
+                        </ul>
+                    </dd>
+                </a>
+            </dl>
+                                                    <dl class="clearfix csdn-tracking-statistics recommend_article" data-mod="popu_387" data-poputype="feed" data-feed-show="false" data-dsm="post">
+                <a href="http://blog.csdn.net/ljd2038/article/details/51705964" target="_blank" strategy="BlogCommendFromBaidu_8">
+                    <dd>
+                        <h2>Retrofit2源码解读</h2>
+                        <div class="summary">
+                            Retrofit2的用法在Retrofit2.0使用详解这篇文章中已经详细介绍过了。那么在这就来看一下Retrofit2它是如何实现的。Retrofit2中它的内部网络请求是依赖于OKHttp，所以R...                        </div>
+
+                        <ul>
+                            <li class="avatar_img"><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/3_ljd2038.jpg" alt="ljd2038" title="ljd2038"></li>
+                            <li class="user_name">ljd2038</li>
+                            <li class="time">2016年06月18日 15:20</li>
+                            <li class="visited_num"><i class="icon iconfont icon-read"></i><span>9174</span></li>
+                        </ul>
+                    </dd>
+                </a>
+            </dl>
+                                                    <dl class="clearfix csdn-tracking-statistics recommend_article" data-mod="popu_387" data-poputype="feed" data-feed-show="false" data-dsm="post">
+                <a href="http://blog.csdn.net/lmj623565791/article/details/51304204" target="_blank" strategy="BlogCommendFromBaidu_9">
+                    <dd>
+                        <h2>Retrofit2 完全解析 探索与okhttp之间的关系</h2>
+                        <div class="summary">
+                            转载请标明出处： 
+  http://blog.csdn.net/lmj623565791/article/details/51304204； 
+  本文出自:【张鸿洋的博客】
+
+
+一、概述
+
+之前写...                        </div>
+
+                        <ul>
+                            <li class="avatar_img"><img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/3_lmj623565791.jpg" alt="lmj623565791" title="lmj623565791"></li>
+                            <li class="user_name">lmj623565791</li>
+                            <li class="time">2016年05月04日 10:02</li>
+                            <li class="visited_num"><i class="icon iconfont icon-read"></i><span>113403</span></li>
+                        </ul>
+                    </dd>
+                </a>
+            </dl>
+                              </div>
+  </main>
+<aside>
+    <div class="right_box user_info">
+    <dl class="inf_bar clearfix">
+        <dt class="csdn-tracking-statistics tracking-click" data-mod="popu_381">
+                <a href="http://blog.csdn.net/carson_ho" target="_blank">
+                    <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/3_carson_ho.jpg" class="avatar_pic">
+        </a>
+      </dt><dd>
+            <h3 class="csdn-tracking-statistics tracking-click" data-mod="popu_380"><a href="http://blog.csdn.net/carson_ho" target="_blank" id="uid">carson_ho</a></h3>
+            <div class="medals" title="">
+                        <svg class="icon" aria-hidden="true">
+                <use xlink:href="#icon-bokezhuanjia"></use>
+            </svg>
+            <span>博客专家</span>
+                      </div>
+                    </dd>
+    </dl>
+    <div class="inf_number_box clearfix">
+        <dl title="130">
+            <dt>原创</dt>
+            <dd>130</dd>
+        </dl>
+        <dl title="2343">
+            <dt>粉丝</dt>
+            <dd id="fan">2343</dd>
+        </dl>
+        <dl title="1864">
+            <dt>喜欢</dt>
+            <dd>1864</dd>
+        </dl>
+        <dl title="810">
+          <dt>评论</dt>
+          <dd>810</dd>
+        </dl>
+    </div>
+
+</div>
+<div class="interflow clearfix">
+      <div class="badge gradeAndbadge">
+        <div>
+                        <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/zhuanlandaren.png" alt="专栏达人">
+                                    <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/chizhiyiheng.png" alt="持之以恒">
+                                            </div>
+    </div>
+      <div class="grade gradeAndbadge gradewidths">
+      <span>等级：</span>
+      <div>
+        <a href="http://blog.csdn.net/home/help.html#level" title="7级,点击查看等级说明" target="_blank">
+          <img class="grade-img" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/blog7.png" alt="7级,点击查看等级说明">
+        </a>
+      </div>
+    </div>
+    <div class="gradeAndbadge gradewidths" title="1333471">
+        <span>访问量：</span>
+        <span class="num odd-overhidden">133万+</span>
+    </div>
+
+    <div class="gradeAndbadge gradewidths" title="12372">
+      <span>积分：</span>
+      <span class="num odd-overhidden">1万+</span>
+    </div>
+    <div class="gradeAndbadge gradewidths" title="1441">
+        <span>排名：</span>
+        <span class="num odd-overhidden">1441</span>
+    </div>
+
+</div>
+<script type="text/javascript">
+  // 判断并设置用户名位置，没有博客专家与关注按钮时，用户名居中
+  $medals_children = $('.medals').children().length;
+  $span_add_follow = $('#span_add_follow').length;
+  if($medals_children === 0 && $span_add_follow === 0){
+    $('.inf_bar dd').css('vertical-align','10px')
+  }
+</script>          <div class="extension_other csdn-tracking-statistics tracking-click" data-mod="popu_389">
+          <!--u3032528-->
+        <div class="flashrecommend">
+                        <div id="_v0fjz9zmn2" style=""><iframe width="300" frameborder="0" height="250" scrolling="no" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/s.html"></iframe></div><script type="text/javascript" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/bwocoltly.js.下载"></script>
+                    </div>
+      </div>
+            <div class="writings">
+      <div class="public_signal clearfix">
+        <h3>他的最新文章</h3>
+        <a href="http://blog.csdn.net/carson_ho" target="_blank" class="more"><span>更多文章</span></a>
+      </div>
+        <ul class="inf_list clearfix csdn-tracking-statistics tracking-click" data-mod="popu_382">
+                        <li class="clearfix">
+                <a href="http://blog.csdn.net/carson_ho/article/details/79549417" target="_blank">Android性能优化：这是一份全面&amp;详细的内存优化指南</a>
+            </li>
+                        <li class="clearfix">
+                <a href="http://blog.csdn.net/carson_ho/article/details/79549382" target="_blank">Android性能优化：那些关于Bitmap图片资源优化的小事</a>
+            </li>
+                        <li class="clearfix">
+                <a href="http://blog.csdn.net/carson_ho/article/details/79522975" target="_blank">高效 保活长连接：手把手教你实现 自适应的心跳保活机制</a>
+            </li>
+                        <li class="clearfix">
+                <a href="http://blog.csdn.net/carson_ho/article/details/79407707" target="_blank">Android性能优化：手把手带你全面了解 内存泄露 &amp; 解决方案</a>
+            </li>
+                        <li class="clearfix">
+                <a href="http://blog.csdn.net/carson_ho/article/details/79373134" target="_blank">Java源码分析：关于 HashMap 1.8 的重大更新</a>
+            </li>
+                    </ul>
+    </div>
+                <div class="user-hotArticle sort ClassSort">
+            <h3>文章分类</h3>
+            <ul class="hotArticle-list sort-list ClassSort-list">
+                                    <li class="clearfix">
+                        <a href="http://blog.csdn.net/carson_ho/article/category/7227390" class="odd-overhidden floatL">RxJava 详细教程</a>
+                        <div class="read list-left floatR"><span>23篇</span></div>
+                    </li>
+                                    <li class="clearfix">
+                        <a href="http://blog.csdn.net/carson_ho/article/category/6735474" class="odd-overhidden floatL">自定义View原理&amp;应用系列</a>
+                        <div class="read list-left floatR"><span>20篇</span></div>
+                    </li>
+                                    <li class="clearfix">
+                        <a href="http://blog.csdn.net/carson_ho/article/category/5959547" class="odd-overhidden floatL">Android基础</a>
+                        <div class="read list-left floatR"><span>24篇</span></div>
+                    </li>
+                                    <li class="clearfix">
+                        <a href="http://blog.csdn.net/carson_ho/article/category/6260188" class="odd-overhidden floatL">Android常用汇总</a>
+                        <div class="read list-left floatR"><span>35篇</span></div>
+                    </li>
+                                    <li class="clearfix">
+                        <a href="http://blog.csdn.net/carson_ho/article/category/6365482" class="odd-overhidden floatL">最易懂的设计模式解析</a>
+                        <div class="read list-left floatR"><span>12篇</span></div>
+                    </li>
+                                    <li class="clearfix">
+                        <a href="http://blog.csdn.net/carson_ho/article/category/6365490" class="odd-overhidden floatL">源码分析</a>
+                        <div class="read list-left floatR"><span>13篇</span></div>
+                    </li>
+                                    <li class="clearfix">
+                        <a href="http://blog.csdn.net/carson_ho/article/category/6435250" class="odd-overhidden floatL">常用开源库</a>
+                        <div class="read list-left floatR"><span>9篇</span></div>
+                    </li>
+                                    <li class="clearfix">
+                        <a href="http://blog.csdn.net/carson_ho/article/category/6440777" class="odd-overhidden floatL">多线程汇总</a>
+                        <div class="read list-left floatR"><span>7篇</span></div>
+                    </li>
+                                    <li class="clearfix">
+                        <a href="http://blog.csdn.net/carson_ho/article/category/7474499" class="odd-overhidden floatL">性能优化</a>
+                        <div class="read list-left floatR"><span>3篇</span></div>
+                    </li>
+                            </ul>
+            <div class="unfold-btn">
+              <span>展开</span><i class="icon iconfont icon-xiajiantou"></i>
+            </div>
+        </div>
+    <!--    [StartShowSelfColumn]-->
+            <div class="host-column">
+            <h3>博主专栏</h3>
+            <ul class="column-list csdn-tracking-statistics tracking-click" data-mod="popu_520">
+<!--                [StartSelfColumn]-->
+                                    <li class="clearfix">
+                        <div class="img list-left">
+                            <a href="http://blog.csdn.net/column/details/14750.html">
+                                <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/20170308143350605" alt="">
+                                <div>11 篇</div>
+                            </a>
+                        </div>
+                        <div class="content list-left">
+                            <h4 class="title"><a href="http://blog.csdn.net/column/details/14750.html">Android基础</a></h4>
+                            <div class="read list-left"><i class="icon iconfont icon-read"></i><span>69481</span></div>
+                        </div>
+                    </li>
+                                    <li class="clearfix">
+                        <div class="img list-left">
+                            <a href="http://blog.csdn.net/column/details/14783.html">
+                                <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/20170310083104720" alt="">
+                                <div>12 篇</div>
+                            </a>
+                        </div>
+                        <div class="content list-left">
+                            <h4 class="title"><a href="http://blog.csdn.net/column/details/14783.html">设计模式</a></h4>
+                            <div class="read list-left"><i class="icon iconfont icon-read"></i><span>52903</span></div>
+                        </div>
+                    </li>
+                                    <li class="clearfix">
+                        <div class="img list-left">
+                            <a href="http://blog.csdn.net/column/details/14784.html">
+                                <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/20170315145314674" alt="">
+                                <div>24 篇</div>
+                            </a>
+                        </div>
+                        <div class="content list-left">
+                            <h4 class="title"><a href="http://blog.csdn.net/column/details/14784.html">常用组件</a></h4>
+                            <div class="read list-left"><i class="icon iconfont icon-read"></i><span>255219</span></div>
+                        </div>
+                    </li>
+                                    <li class="clearfix">
+                        <div class="img list-left">
+                            <a href="http://blog.csdn.net/column/details/14815.html">
+                                <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/20170315145146411" alt="">
+                                <div>8 篇</div>
+                            </a>
+                        </div>
+                        <div class="content list-left">
+                            <h4 class="title"><a href="http://blog.csdn.net/column/details/14815.html">自定义View</a></h4>
+                            <div class="read list-left"><i class="icon iconfont icon-read"></i><span>100268</span></div>
+                        </div>
+                    </li>
+                                    <li class="clearfix">
+                        <div class="img list-left">
+                            <a href="http://blog.csdn.net/column/details/14816.html">
+                                <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/20170310083649314" alt="">
+                                <div>4 篇</div>
+                            </a>
+                        </div>
+                        <div class="content list-left">
+                            <h4 class="title"><a href="http://blog.csdn.net/column/details/14816.html">多线程</a></h4>
+                            <div class="read list-left"><i class="icon iconfont icon-read"></i><span>15432</span></div>
+                        </div>
+                    </li>
+                                    <li class="clearfix">
+                        <div class="img list-left">
+                            <a href="http://blog.csdn.net/column/details/14849.html">
+                                <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/20170314102401709" alt="">
+                                <div>5 篇</div>
+                            </a>
+                        </div>
+                        <div class="content list-left">
+                            <h4 class="title"><a href="http://blog.csdn.net/column/details/14849.html">常用开源库使用分析</a></h4>
+                            <div class="read list-left"><i class="icon iconfont icon-read"></i><span>26298</span></div>
+                        </div>
+                    </li>
+                                    <li class="clearfix">
+                        <div class="img list-left">
+                            <a href="http://blog.csdn.net/column/details/17714.html">
+                                <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/20171016094217815" alt="">
+                                <div>9 篇</div>
+                            </a>
+                        </div>
+                        <div class="content list-left">
+                            <h4 class="title"><a href="http://blog.csdn.net/column/details/17714.html">RxJava详细教程</a></h4>
+                            <div class="read list-left"><i class="icon iconfont icon-read"></i><span>81044</span></div>
+                        </div>
+                    </li>
+                                    <li class="clearfix">
+                        <div class="img list-left">
+                            <a href="http://blog.csdn.net/column/details/19707.html">
+                                <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/20180218110117705" alt="">
+                                <div>5 篇</div>
+                            </a>
+                        </div>
+                        <div class="content list-left">
+                            <h4 class="title"><a href="http://blog.csdn.net/column/details/19707.html">Protocol Buffer序列化</a></h4>
+                            <div class="read list-left"><i class="icon iconfont icon-read"></i><span>98618</span></div>
+                        </div>
+                    </li>
+                                    <li class="clearfix">
+                        <div class="img list-left">
+                            <a href="http://blog.csdn.net/column/details/19708.html">
+                                <img src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/20180218110603078" alt="">
+                                <div>7 篇</div>
+                            </a>
+                        </div>
+                        <div class="content list-left">
+                            <h4 class="title"><a href="http://blog.csdn.net/column/details/19708.html">Hybird混合开发</a></h4>
+                            <div class="read list-left"><i class="icon iconfont icon-read"></i><span>319714</span></div>
+                        </div>
+                    </li>
+                <!--                [EndSelfColumn]-->
+            </ul>
+            <div class="unfold-btn">
+                <span>展开</span><i class="icon iconfont icon-xiajiantou"></i>
+            </div>
+        </div>
+    <!--    [EndShowSelfColumn]-->
+            <div class="user-hotArticle sort timeSort">
+          <h3>文章存档</h3>
+          <ul class="hotArticle-list timeSort-list">
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2018/03" class="odd-overhidden floatL">2018年3月</a>
+                  <div class="read list-left floatR"><span>4篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2018/02" class="odd-overhidden floatL">2018年2月</a>
+                  <div class="read list-left floatR"><span>9篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2018/01" class="odd-overhidden floatL">2018年1月</a>
+                  <div class="read list-left floatR"><span>9篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/12" class="odd-overhidden floatL">2017年12月</a>
+                  <div class="read list-left floatR"><span>3篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/11" class="odd-overhidden floatL">2017年11月</a>
+                  <div class="read list-left floatR"><span>7篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/10" class="odd-overhidden floatL">2017年10月</a>
+                  <div class="read list-left floatR"><span>5篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/09" class="odd-overhidden floatL">2017年9月</a>
+                  <div class="read list-left floatR"><span>2篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/08" class="odd-overhidden floatL">2017年8月</a>
+                  <div class="read list-left floatR"><span>6篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/07" class="odd-overhidden floatL">2017年7月</a>
+                  <div class="read list-left floatR"><span>4篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/06" class="odd-overhidden floatL">2017年6月</a>
+                  <div class="read list-left floatR"><span>10篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/05" class="odd-overhidden floatL">2017年5月</a>
+                  <div class="read list-left floatR"><span>4篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/04" class="odd-overhidden floatL">2017年4月</a>
+                  <div class="read list-left floatR"><span>5篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/03" class="odd-overhidden floatL">2017年3月</a>
+                  <div class="read list-left floatR"><span>6篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/02" class="odd-overhidden floatL">2017年2月</a>
+                  <div class="read list-left floatR"><span>12篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2017/01" class="odd-overhidden floatL">2017年1月</a>
+                  <div class="read list-left floatR"><span>2篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2016/12" class="odd-overhidden floatL">2016年12月</a>
+                  <div class="read list-left floatR"><span>1篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2016/11" class="odd-overhidden floatL">2016年11月</a>
+                  <div class="read list-left floatR"><span>11篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2016/10" class="odd-overhidden floatL">2016年10月</a>
+                  <div class="read list-left floatR"><span>4篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2016/09" class="odd-overhidden floatL">2016年9月</a>
+                  <div class="read list-left floatR"><span>6篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2016/08" class="odd-overhidden floatL">2016年8月</a>
+                  <div class="read list-left floatR"><span>5篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2016/07" class="odd-overhidden floatL">2016年7月</a>
+                  <div class="read list-left floatR"><span>2篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2016/06" class="odd-overhidden floatL">2016年6月</a>
+                  <div class="read list-left floatR"><span>4篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2016/05" class="odd-overhidden floatL">2016年5月</a>
+                  <div class="read list-left floatR"><span>4篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2016/04" class="odd-overhidden floatL">2016年4月</a>
+                  <div class="read list-left floatR"><span>3篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2016/03" class="odd-overhidden floatL">2016年3月</a>
+                  <div class="read list-left floatR"><span>1篇</span></div>
+                </li>
+                            <li class="clearfix">
+                  <a href="http://blog.csdn.net/carson_ho/article/month/2015/11" class="odd-overhidden floatL">2015年11月</a>
+                  <div class="read list-left floatR"><span>1篇</span></div>
+                </li>
+                      </ul>
+          <div class="unfold-btn">
+            <span>展开</span><i class="icon iconfont icon-xiajiantou"></i>
+          </div>
+        </div>
+            <div class="user-hotArticle">
+        <h3>他的热门文章</h3>
+        <ul class="hotArticle-list csdn-tracking-statistics tracking-click" data-mod="popu_521">
+<!--        [StartHotArticles]-->
+                            <li>
+                    <a href="http://blog.csdn.net/carson_ho/article/details/52693322">Android：最全面的 Webview 详解</a>
+                    <div class="read list-left"><i class="icon iconfont icon-read"></i><span>113084</span></div>
+                </li>
+                            <li>
+                    <a href="http://blog.csdn.net/carson_ho/article/details/64904691">Android：你要的WebView与 JS 交互方式 都在这里了</a>
+                    <div class="read list-left"><i class="icon iconfont icon-read"></i><span>97494</span></div>
+                </li>
+                            <li>
+                    <a href="http://blog.csdn.net/carson_ho/article/details/54136311">Android事件分发机制 详解攻略，您值得拥有</a>
+                    <div class="read list-left"><i class="icon iconfont icon-read"></i><span>44232</span></div>
+                </li>
+                            <li>
+                    <a href="http://blog.csdn.net/carson_ho/article/details/73732076">这是一份很详细的 Retrofit 2.0 使用教程（含实例讲解）</a>
+                    <div class="read list-left"><i class="icon iconfont icon-read"></i><span>43748</span></div>
+                </li>
+                            <li>
+                    <a href="http://blog.csdn.net/carson_ho/article/details/64904635">Android：你不知道的 WebView 使用漏洞</a>
+                    <div class="read list-left"><i class="icon iconfont icon-read"></i><span>39703</span></div>
+                </li>
+                            <li>
+                    <a href="http://blog.csdn.net/carson_ho/article/details/53366856">Android：这是一份很详细的Socket使用攻略</a>
+                    <div class="read list-left"><i class="icon iconfont icon-read"></i><span>30850</span></div>
+                </li>
+                            <li>
+                    <a href="http://blog.csdn.net/carson_ho/article/details/71077193">Android开源库V - Layout：淘宝、天猫都在用的UI框架，赶紧用起来吧！</a>
+                    <div class="read list-left"><i class="icon iconfont icon-read"></i><span>29563</span></div>
+                </li>
+                            <li>
+                    <a href="http://blog.csdn.net/carson_ho/article/details/70568606">Protocol Buffer 序列化原理大揭秘 - 为什么Protocol Buffer性能这么好？</a>
+                    <div class="read list-left"><i class="icon iconfont icon-read"></i><span>28193</span></div>
+                </li>
+                            <li>
+                    <a href="http://blog.csdn.net/carson_ho/article/details/70267574">这是一份很有诚意的 Protocol Buffer 语法详解</a>
+                    <div class="read list-left"><i class="icon iconfont icon-read"></i><span>23264</span></div>
+                </li>
+                            <li>
+                    <a href="http://blog.csdn.net/carson_ho/article/details/70037693">快来看看Google出品的Protocol Buffer，别只会用Json和XML了</a>
+                    <div class="read list-left"><i class="icon iconfont icon-read"></i><span>21905</span></div>
+                </li>
+            <!--        [EndHotArticles]-->
+        </ul>
+    </div>
+    
+<!--    [startcustom]-->
+    <!--    [endcustom]-->
+  <div class="fixRight_box" style="height:256px">
+    <div class="fixRight">
+                    <!--u3163270-->
+                        <script type="text/javascript" src="./Android：手把手带你深入剖析 Retrofit 2.0 源码 - CSDN博客_files/avneunkwb.js.下载"></script></div></div></aside></div></body></html>
